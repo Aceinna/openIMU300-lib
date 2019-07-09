@@ -1,0 +1,22 @@
+{
+	"name": "OpenIMU300-base-library",
+ 	"version": "1.0.5",
+ 	"description": "OpenIMU300 Base Library",
+ 	"build": {
+ 		"flags": [
+			"-L Sensors",
+			"-l libOpenIMU300.a",
+			"-I Sensors",
+			"-I Platform/Filter/include",
+			"-I Platform/Board/include",
+			"-I Platform/Core/include",
+			"-I Platform",
+			"-I MCU/include",
+			"-I MCU/CMSIS",
+			"-I MCU",
+ 			"-I FreeRTOS_M4",
+			"-I FreeRTOS/include"
+		],
+		"libArchive": false
+ 	}
+ }

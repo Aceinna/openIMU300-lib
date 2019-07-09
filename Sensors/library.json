@@ -1,0 +1,13 @@
+{
+	"name": "OpenIMU300-library",
+ 	"version": "1.0.5",
+ 	"description": "OpenIMU300 Library",
+ 	"build": {
+ 		"flags": [
+			"-L .",
+			"-l libOpenIMU300.a",
+			"-I ."
+ 		],
+		"libArchive": true
+ 	}
+ }

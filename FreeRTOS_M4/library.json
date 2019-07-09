@@ -1,0 +1,10 @@
+{
+	"name": "FreeRTOS M4 support",
+ 	"version": "1.0.4",
+ 	"description": "FreeRTOS port functions for M4",
+ 	"build": {
+ 		"flags": [
+			"-I include"
+ 		]
+ 	}
+ }

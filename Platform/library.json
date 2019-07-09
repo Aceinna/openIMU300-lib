@@ -1,0 +1,16 @@
+{
+	"name": "OpenIMU300-platform-library",
+ 	"version": "1.0.5",
+ 	"description": "OpenIMU300 platform Library",
+ 	"build": {
+ 		"flags": [
+			"-I Filter",
+			"-I Filter/include",
+			"-I Board",
+			"-I Board/include",
+			"-I Core",
+			"-I Core/include",
+			"-I ."
+ 		]
+ 	}
+ }
