@@ -166,8 +166,9 @@ void BoardInit(void)
     //   approximately a 120 MHz system clock using PLLs.
     BSP_init();              // bsp.c
     
+#ifndef CAN_BUS_COMM
     BoardDetectTestMode();
-
+#endif
     ControlPortInit();
     RCC_ClearFlag(); ///< reset flags - stm32f2xx_rccc.c
     // ---------------------------- BOOT CAUSE MESSAGING -----------------------
@@ -175,11 +176,6 @@ void BoardInit(void)
     ///   (the board is configured according to the signal levels on these pins)
     InitBoardConfiguration_GPIO();  // configureGPIO.c
     ReadUnitHwConfiguration();   // configureGPIO.c
-
-    // Debugging pin IO3 will be used to indicate to the user when the rate-
-    //   sensor is read (with a rising edge).  Start operation by setting this
-    //   pin low.
-    GPIOB->BSRRH = GPIO_Pin_11;  // Set IO3 low
 
 }
 

@@ -1,5 +1,5 @@
 {
-	"name": "FreeRTOS M4 support",
+	"name": "FreeRTOS_M4",
  	"version": "1.0.4",
  	"description": "FreeRTOS port functions for M4",
  	"build": {

@@ -83,5 +83,6 @@ void MagnetomterDataReadyIRQ(void);
 void BeginRateSensorRead(void);
 void InitSensors(); 
 void ActivateSensors(); 
+void ApplyRatesBiasCompensation(double *ratesDataBias);
 
 #endif

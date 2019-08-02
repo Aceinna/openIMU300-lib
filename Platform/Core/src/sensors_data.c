@@ -30,6 +30,7 @@ limitations under the License.
 #include <GlobalConstants.h>
 #include "sensors_data.h"
 #include "sensorsAPI.h"
+#include "qmath.h"
 
 sensors_data_t gSensorsData;
 
@@ -39,6 +40,17 @@ void GetAccelData_g(double *data)
 {
     for(int i = 0; i < 3; i++){
         data[i] = gSensorsData.scaledSensors[i+XACCEL];
+    }
+}
+
+void ApplyRatesBiasCompensation(double *ratesDataBias)
+{
+    for(int i = 0; i < 3; i++){
+        gSensorsData.scaledSensors[i+XRATE]  -= ratesDataBias[i];
+    }
+
+    for(int i = 0; i < 3; i++){
+        gSensorsData.scaledSensors_q27[i+XRATE] = doubleToQ27( gSensorsData.scaledSensors[i + XRATE]);
     }
 }
 

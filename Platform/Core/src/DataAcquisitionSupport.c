@@ -422,16 +422,14 @@ void InitClockMeasurementTimer(uint32_t freq)
  ******************************************************************************/
 void DataAquisitionStart(void)
 {
-    // Configure and enable TIM2
-#if TIM2_800Hz
+    // Configure and enable timers
     InitClockMeasurementTimer(1000);
-    InitDataAcquisitionTimer(800);  //TIM2_OUTPUT_DATA_RATE
-#else
-    InitDataAcquisitionTimer( timer.odr );
-#endif
+    InitDataAcquisitionTimer(800);
 
      /// Enable external sync 1 PPS A0 interrupt
+    if(!BoardIsTestMode()){
     _InitExternalSync( ENABLE );
+    }
 
     ActivateSensors();
 
@@ -467,10 +465,13 @@ void TaskDataAcquisition_Init(void)
 }
 
 
+uint32_t imuCounter = 0;
 
 void PrepareToNewDacqTick()
 {
     static BOOL firstTime = TRUE;
+
+    imuCounter += 5;   // miliseconds considering 200Hz tick 
 
     if(BoardIsTestMode()){
     if(firstTime){
@@ -499,6 +500,10 @@ void PrepareToNewDacqTickAndProcessUartMessages()
     PrepareToNewDacqTick();
 }
 
+uint32_t   platformGetIMUCounter()
+{
+    return imuCounter;
+}
 
 
 /** ***************************************************************************

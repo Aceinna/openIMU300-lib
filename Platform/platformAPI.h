@@ -24,8 +24,8 @@ limitations under the License.
 *******************************************************************************/
 
 
-#ifndef _XBOW_API_H
-#define _XBOW_API_H
+#ifndef _PLATFORM_API_H
+#define _PLATFORM_API_H
 #include <stdint.h>
 #include "GlobalConstants.h"
 
@@ -105,6 +105,7 @@ void       platformUpdateAccelFilterType(uint8_t type);
 int        platformGetPreFilterType();
 int        platformGetFilterCounts(uint32_t type);
 int        platformGetFilterType(int sensor);
+uint32_t   platformGetIMUCounter();
 
 
 

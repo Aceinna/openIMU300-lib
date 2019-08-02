@@ -1,7 +1,7 @@
 {
-	"name": "FreeRTOS library",
+	"name": "FreeRTOS",
  	"version": "1.0.3",
- 	"description": "Open Source FreeRTOS",
+ 	"description": "Open Source FreeRTOS library",
  	"build": {
  		"flags": [
 			"-I include",

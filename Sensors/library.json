@@ -1,11 +1,11 @@
 {
-	"name": "OpenIMU300-library",
- 	"version": "1.0.5",
- 	"description": "OpenIMU300 Library",
+	"name": "Sensors",
+ 	"version": "1.0.6",
+ 	"description": "OpenIMU300 sensors and storage library",
  	"build": {
  		"flags": [
 			"-L .",
-			"-l libOpenIMU300.a",
+			"-l libSensors.a",
 			"-I ."
  		],
 		"libArchive": true

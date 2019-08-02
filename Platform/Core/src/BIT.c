@@ -40,6 +40,7 @@ limitations under the License.
 #include "platformAPI.h"
 #include "sensors_data.h"
 #include "algorithmAPI.h"   // INitializeAlgorithmStruct
+#include "boardAPI.h"   // INitializeAlgorithmStruct
 
 extern ConfigurationStruct gConfiguration;
 BITStatusStruct            gBitStatus;
@@ -78,6 +79,10 @@ void updateBITandStatus()
     gBitStatus.BITStatus.bit.sensorStatus   = (gBitStatus.sensorStatus.all & gConfiguration.sensorStatusEnable)   ? 1:0;
     gBitStatus.BITStatus.bit.softwareStatus = (gBitStatus.swStatus.all     & gConfiguration.softwareStatusEnable) ? 1:0;
     gBitStatus.BITStatus.bit.masterStatus   = (gBitStatus.BITStatus.all    & 0x1E00)                              ? 1:0;
+
+    if(BoardIsTestMode()){
+        gBitStatus.BITStatus.bit.softwareStatus = 1;
+    }
 
 #if 0
 	/// external mag logic

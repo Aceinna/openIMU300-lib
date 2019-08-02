@@ -841,7 +841,10 @@ static void _UcbReadApp(ExternPortTypeEnum port, UcbPacketStruct  *ptrUcbPacket)
  ******************************************************************************/
 void HandleUcbPacket ( UcbPacketStruct *ptrUcbPacket)
 {
+
+#ifndef CAN_BUS_COMM
     int result;
+#endif
 
     ExternPortTypeEnum port = userSerialChan;
     if(port >= 0 && port < NUM_UART_PORTS && ptrUcbPacket){

@@ -564,7 +564,8 @@ void _UcbScaled0 (ExternPortTypeEnum port,
 void _UcbScaled1 (ExternPortTypeEnum port,
                   UcbPacketStruct    *ptrUcbPacket)
 {
-	uint16_t packetIndex = 0;
+	static uint16_t packetCounter = 0;
+    uint16_t        packetIndex   = 0;
 
 	ptrUcbPacket->payloadLength = UCB_SCALED_1_LENGTH;
     /// X-accelerometer, Y, Z
@@ -590,7 +591,7 @@ void _UcbScaled1 (ExternPortTypeEnum port,
 
     packetIndex = uint16ToBuffer(ptrUcbPacket->payload, /// packet counter
                                  packetIndex,
-                                 gAlgorithm.counter );
+                                 packetCounter++ );
 
     packetIndex = uint16ToBuffer(ptrUcbPacket->payload, /// BIT status
                                  packetIndex,

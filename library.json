@@ -1,6 +1,6 @@
 {
 	"name": "OpenIMU300-base-library",
- 	"version": "1.0.5",
+ 	"version": "1.0.6",
  	"description": "OpenIMU300 Base Library",
     "keywords": "sensors, IMU, INS, AI, automotive, navigation",
  	"repository":
@@ -12,15 +12,15 @@
 	"build": {
  		"flags": [
 			"-L Sensors",
-			"-l libOpenIMU300.a",
+			"-l libSensors.a",
 			"-I Sensors",
 			"-I Platform/Filter/include",
 			"-I Platform/Board/include",
 			"-I Platform/Core/include",
 			"-I Platform",
-			"-I MCU/include",
-			"-I MCU/CMSIS",
-			"-I MCU",
+			"-I STM32F405/include",
+			"-I STM32F405/CMSIS",
+			"-I STM32F405",
  			"-I FreeRTOS_M4",
 			"-I FreeRTOS/include"
 		],

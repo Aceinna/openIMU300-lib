@@ -56,7 +56,9 @@ int debugSerialChan = UART_CHANNEL_2;   // defaul channel
 void  InitDebugSerialCommunication(uint32_t baudrate)
 {
     debugSerialChan = platformGetSerialChannel(DEBUG_SERIAL_PORT);
+#ifndef CAN_BUS_COMM
     uart_init(debugSerialChan, baudrate);
+#endif
 }
 
 

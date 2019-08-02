@@ -337,15 +337,9 @@ void platformInitConfigureUnit(void)
       gConfiguration.packetRateDivider = 10;     // 20 Hz at 200, will show 10 Hz     
 
 
-
-    /// check user orientation field for validity and set defaults based on com
-    //  type if not valid xbow_fields.c
+    /// check user orientation field for validity
     if (CheckOrientation(gConfiguration.orientation.all) == FALSE) {
-        if( platformGetUnitCommunicationType() == UART_COMM ) {
-            gConfiguration.orientation.all = 0;
-        } else { // SPI
-            gConfiguration.orientation.all = 0x6b;
-        }
+        gConfiguration.orientation.all = 0; // +x +y +z
     }
 
     /// check port configuration fields against rules
