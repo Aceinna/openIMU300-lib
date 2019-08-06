@@ -1,2 +1,2 @@
-# openIMU-libTest
-Sandbox for testing openIMU libraries
+# openIMU300-lib
+OpenIMU300 base library
