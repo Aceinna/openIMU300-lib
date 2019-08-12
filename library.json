@@ -1,12 +1,12 @@
 {
 	"name": "OpenIMU300-base-library",
- 	"version": "1.0.6",
+ 	"version": "1.0.7",
  	"description": "OpenIMU300 Base Library",
     "keywords": "sensors, IMU, INS, AI, automotive, navigation",
  	"repository":
     {
        "type": "git",
-       "url": "https://github.com/Aceinna/openIMU-libTest.git",
+       "url": "https://github.com/Aceinna/openIMU300-lib.git",
        "branch": "master"
     },
 	"build": {
