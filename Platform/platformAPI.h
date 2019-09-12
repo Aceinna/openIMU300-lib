@@ -81,7 +81,9 @@ void markEEPROMLocked();
 BOOL readFlash(uint32_t addr, uint8_t *buf, uint16_t len);
 void platformInitConfigureUnit(void);
 void platformUnassignSerialChannels();
+void platformForceUnassignSerialChannels();
 BOOL platformAssignPortTypeToSerialChannel(int portType, int channel);
+BOOL platformForcePortTypeToSerialChannel(int portType, int channel);
 int  platformGetSerialChannel(int portType);
 void platformRegisterRxSerialSemaphoreID(int portType, void *semId);
 void platformGetVersionBytes(uint8_t *bytes);
@@ -106,6 +108,10 @@ int        platformGetPreFilterType();
 int        platformGetFilterCounts(uint32_t type);
 int        platformGetFilterType(int sensor);
 uint32_t   platformGetIMUCounter();
+void       platformUpdateITOW(uint32_t itow);
+uint64_t   platformGetEstimatedITOW();
+void       platformDetectUserSerialCmd(uint8_t input);
+uint64_t   platformGetSolutionTstamp();
 
 
 
@@ -140,5 +146,8 @@ extern void    SetSensorError(int sensor);
 extern int userSerialChan;
 extern int gpsSerialChan;
 extern int debugSerialChan;
+
+#define LEGACY_BOOT_SEQUENCE 0x0055554A4200A0CELL
+#define LEGACY_PING_SEQUENCE 0x005555504B009EF4LL
 
 #endif

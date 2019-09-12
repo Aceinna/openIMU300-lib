@@ -673,6 +673,10 @@ void uart_BIT (int uartType)
 {
     int uartChan = platformGetSerialChannel(uartType);
     USART_TypeDef *uart;
+    
+    if(uartChan < 0 || uartChan > 2){
+        return;
+    }
 
     gBitStatus.comSABIT.bit.breakDetect  = 0;
     gBitStatus.comSABIT.bit.framingError = 0;

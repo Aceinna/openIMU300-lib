@@ -63,6 +63,7 @@ ucbInputSyncTableEntry_t ucbInputSyncTable[] = {		//
     {UCB_READ_FIELDS,        0x5246},   //  "RF" 
     {UCB_WRITE_FIELDS,       0x5746},   //  "WF" 
     {UCB_UNLOCK_EEPROM,      0x5545},   //  "UE" 
+    {UCB_LOCK_EEPROM,        0x4C45},   //  "LE" 
     {UCB_READ_EEPROM,        0x5245},   //  "RE" 
     {UCB_WRITE_EEPROM,       0x5745},   //  "WE" 
     {UCB_SOFTWARE_RESET,     0x5352},   //  "SR" 
@@ -128,7 +129,7 @@ BOOL HandleUcbRx (UcbPacketStruct  *ucbPacket)
                 }
                 syncTable++;
             }
-#ifndef CAN_BUS_COMM
+#ifndef USER_PACKETS_NOT_SUPPORTED
             if(!synced){
                 type = checkUserPacketType(code);
                 if(type != UCB_ERROR_INVALID_TYPE){

@@ -168,7 +168,7 @@ BOOL CheckContPacketRate (uint16_t      outputPacket,
             default:
                 valid = FALSE;
         }
-#ifndef CAN_BUS_COMM
+#ifndef USER_PACKETS_NOT_SUPPORTED
         if(outputPacket == UCB_USER_OUT){
             bytesPerPacket += getUserPayloadLength();
             valid = TRUE;
@@ -1240,4 +1240,64 @@ int  platformGetFilterCounts(uint32_t type)
 
 }
 
+void platformForceUnassignSerialChannels()
+{
+    _uartChannel[USER_SERIAL_PORT]  = UART_CHANNEL_NONE;
+    _uartChannel[GPS_SERIAL_PORT]   = UART_CHANNEL_NONE;
+    _uartChannel[DEBUG_SERIAL_PORT] = UART_CHANNEL_NONE;
+    userSerialChan  = -1;
+    debugSerialChan = -1;
+    gpsSerialChan   = -1;
+}
 
+BOOL platformForcePortTypeToSerialChannel(int portType, int channel)
+{
+
+    if(_communicationType == SPI_COMM && 
+        (channel == UART_CHANNEL_0 || channel == UART_CHANNEL_1)){
+        return FALSE; 
+    }
+
+    if(portType < USER_SERIAL_PORT || portType > DEBUG_SERIAL_PORT){
+        return FALSE; 
+    }
+
+    if(channel < UART_CHANNEL_NONE || channel > UART_CHANNEL_2){
+        return FALSE; 
+    }
+    
+    if(_uartChannel[portType] == UART_CHANNEL_NONE){
+        _uartChannel[portType] = channel;
+        switch (portType){
+            case USER_SERIAL_PORT:
+                userSerialChan   = _uartChannel[USER_SERIAL_PORT];
+                break;
+            case GPS_SERIAL_PORT:
+                gpsSerialChan   = _uartChannel[GPS_SERIAL_PORT];
+                break;
+            case DEBUG_SERIAL_PORT:
+                debugSerialChan = _uartChannel[DEBUG_SERIAL_PORT];
+                break;
+        } 
+        return TRUE;
+    }
+
+   
+    return FALSE;
+}
+
+
+void platformDetectUserSerialCmd(uint8_t input)
+{
+    static uint64_t inputSequence = 0LL;
+
+    inputSequence <<= 8;
+    inputSequence |= input; 
+    inputSequence &= 0x00FFFFFFFFFFFFFFLL; 
+    if( inputSequence == LEGACY_BOOT_SEQUENCE ||
+        inputSequence == LEGACY_PING_SEQUENCE){
+        platformForceUnassignSerialChannels();
+        platformForcePortTypeToSerialChannel(USER_SERIAL_PORT, UART_CHANNEL_0);   //switch serial channel to user port
+
+        }
+}

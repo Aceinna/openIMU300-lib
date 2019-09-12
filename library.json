@@ -1,6 +1,6 @@
 {
 	"name": "OpenIMU300-base-library",
- 	"version": "1.0.6",
+ 	"version": "1.0.7",
  	"description": "OpenIMU300 Base Library",
     "keywords": "sensors, IMU, INS, AI, automotive, navigation",
  	"repository":
@@ -14,6 +14,7 @@
 			"-L Sensors",
 			"-l libSensors.a",
 			"-I Sensors",
+			"-I Platform/CAN/include",
 			"-I Platform/Filter/include",
 			"-I Platform/Board/include",
 			"-I Platform/Core/include",

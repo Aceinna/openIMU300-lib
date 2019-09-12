@@ -1074,7 +1074,7 @@ void _UcbNav2 (ExternPortTypeEnum port,
 void SendUcbPacket (UcbPacketStruct    *ptrUcbPacket)
 {
 
-#ifndef CAN_BUS_COMM
+#ifndef USER_PACKETS_NOT_SUPPORTED
     BOOL result;
 #endif
 
@@ -1123,7 +1123,7 @@ void SendUcbPacket (UcbPacketStruct    *ptrUcbPacket)
             case UCB_ANGLE_2:          // A2 0x4132
                 _UcbAngle2(port, ptrUcbPacket);
                 break;
-#ifndef CAN_BUS_COMM
+#ifndef USER_PACKETS_NOT_SUPPORTED
             case UCB_USER_OUT:
                 result = HandleUserOutputPacket(ptrUcbPacket->payload, &ptrUcbPacket->payloadLength);
                 if( platformGetUnitCommunicationType() != SPI_COMM && result != FALSE) {

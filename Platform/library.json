@@ -1,10 +1,11 @@
 {
 	"name": "Platform",
- 	"version": "1.0.5",
+ 	"version": "1.0.7",
  	"description": "OpenIMU300 platform Library",
  	"build": {
  		"flags": [
 			"-I Filter",
+			"-I CAN/include",
 			"-I Filter/include",
 			"-I Board",
 			"-I Board/include",

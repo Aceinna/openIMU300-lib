@@ -842,7 +842,7 @@ static void _UcbReadApp(ExternPortTypeEnum port, UcbPacketStruct  *ptrUcbPacket)
 void HandleUcbPacket ( UcbPacketStruct *ptrUcbPacket)
 {
 
-#ifndef CAN_BUS_COMM
+#ifndef USER_PACKETS_NOT_SUPPORTED
     int result;
 #endif
 
@@ -888,7 +888,7 @@ void HandleUcbPacket ( UcbPacketStruct *ptrUcbPacket)
                 _UcbError(port, ptrUcbPacket); break;
             case UCB_ERROR_CRC_FAIL:
                 _UcbError(port, ptrUcbPacket); break;
-#ifndef CAN_BUS_COMM
+#ifndef USER_PACKETS_NOT_SUPPORTED
             case UCB_USER_IN:
                 result = HandleUserInputPacket(ptrUcbPacket);
                 if(result != USER_PACKET_OK){

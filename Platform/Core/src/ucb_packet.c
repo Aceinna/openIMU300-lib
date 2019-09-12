@@ -97,7 +97,7 @@ UcbPacketType UcbPacketBytesToPacketType (const uint8_t bytes [])
         pkt++;
 	}
     
-#ifndef CAN_BUS_COMM
+#ifndef USER_PACKETS_NOT_SUPPORTED
     if(packetType == UCB_ERROR_INVALID_TYPE){
         packetType = (UcbPacketType)checkUserPacketType(receivedCode);
     }
@@ -121,7 +121,7 @@ void UcbPacketPacketTypeToBytes (UcbPacketType type,
     ucb_packet_t *ptr = ucbPackets;
 // carefull here, since for sake of speed it's indexing but not lookup through ucbPackets structure  
 
-#ifndef CAN_BUS_COMM
+#ifndef USER_PACKETS_NOT_SUPPORTED
     if(type == UCB_USER_OUT){
         userPacketTypeToBytes(bytes);
         return;

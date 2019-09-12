@@ -64,12 +64,16 @@ typedef struct {
     };
 }stime_t;
 
-uint64_t currSystemTime = 0;
-uint32_t prevTim5Val    = 0;
-uint64_t ppsTstamp      = 0;
+static uint32_t prevTim5Val    = 0;
+static uint64_t ppsTstamp      = 0;
+static uint64_t solutionTstamp = 0;
+static uint64_t iTowTstamp     = 0;
+static uint64_t prevItow       = 0;
+static uint64_t iTow = 0;
 
 stime_t tStamp;
 
+// value in microseconds
 uint64_t platformGetCurrTimeStamp()
 {
     OSDisableHook();
@@ -111,6 +115,23 @@ uint64_t platformGetPpsTimeStamp()
     return ppsTstamp;
 }
 
+void  platformSetPpsTimeStamp(uint32_t tmr)
+{
+    if(tmr < prevTim5Val){
+        tStamp.timeHi++;
+    }
+    tStamp.timeLo = tmr; 
+    prevTim5Val   = tmr;
+    ppsTstamp     = tStamp.time / 60;
+    if(prevItow){
+        iTow     = prevItow;
+        prevItow = 0;
+    }
+   
+    iTow += 1000000;
+}
+
+
 
 
 uint32_t prevTs = 0;
@@ -120,6 +141,108 @@ uint8_t getPpsFlag( void ) { return ppsDetected; } // dmu.h
 void    setPpsFlag( uint8_t gotPpsFlag ) { ppsDetected = gotPpsFlag; }
 uint8_t platformGetPpsFlag( void ) { return ppsDetected; } // dmu.h
 void    platformSetPpsFlag( uint8_t gotPpsFlag ) { ppsDetected = gotPpsFlag; }
+
+
+void    platformUpdateITOW(uint32_t itow)
+{
+    uint64_t tStamp = platformGetCurrTimeStamp();
+    uint32_t ddd    = tStamp - ppsTstamp; 
+
+    if(ddd > 900000){
+        // > 0.9 seconds - disregard ITOW, wait for next
+        return; 
+    }   
+
+    prevItow = (uint64_t)itow * 1000;     // microsecond resolution
+}
+
+uint64_t platformGetEstimatedITOW()
+{
+    uint64_t tStamp = platformGetCurrTimeStamp();
+    uint64_t ddd;; 
+
+    if(!ppsTstamp){
+        ddd = tStamp - iTowTstamp; 
+    }else{
+        ddd = tStamp - ppsTstamp; 
+    }
+
+    return iTow + ddd;
+}
+
+uint64_t platformGetEstimatedITOWFromIsr()
+{
+    uint64_t tStamp = platformGetCurrTimeStampFromIsr();
+    uint64_t ddd; 
+
+    if(!ppsTstamp){
+        ddd = tStamp - iTowTstamp; 
+    }else{
+        ddd = tStamp - ppsTstamp; 
+    }
+    
+    return iTow + ddd;
+}
+
+
+uint64_t platformGetSolutionTstamp()
+{
+    return solutionTstamp;
+}
+
+//BOOL   ppsSync            = FALSE;
+int    numAdjustments     = 0;
+int    adjustmentVal      = 0; 
+int    adjustmentValLast  = 0; 
+int    rem    = 0;
+int    divv   = 0;
+int    divva  = 0;
+int    ratioP = 0, ratioM = 0, adjStep = 0, adj1 = 0;
+BOOL   dir;
+BOOL   syncP  = FALSE;
+BOOL   resync = FALSE;
+
+
+void adjustDacqSyncPhase()
+{
+    int ddd;
+
+    // no valid sync pulse detected
+    // keep ols settings
+
+    if(!syncP){
+        return;
+    }
+
+    if(resync){
+        resync  = FALSE;
+        ratioP  = rem;
+        ratioM  = 200 - ratioP;
+        dir     = 1;
+        divva   = divv; 
+        adj1    = adjStep;
+        adjStep = 0;
+    }
+    
+    if(ratioP && dir){
+        ddd  = divva + adj1;
+        adj1 = 0;
+        if(ratioM){
+            dir ^= 1;
+        }
+        TIM_SetAutoreload(TIM2, ddd);
+        ratioP -= 1;
+    }
+
+    if(!dir && ratioM){
+        if(ratioP){
+            dir ^= 1;
+        }
+        ratioM -= 1; 
+        TIM_SetAutoreload(TIM2, divva-1);
+    }
+}
+
 
 /** ***************************************************************************
  * @name ONE_PPS_EXTI_IRQHandler() LOCAL TIM2 global interrupt request handler.
@@ -134,11 +257,9 @@ void    platformSetPpsFlag( uint8_t gotPpsFlag ) { ppsDetected = gotPpsFlag; }
  ******************************************************************************/
 void ONE_PPS_EXTI_IRQHandler(void)
 {
-
     OSEnterISR();
 
     if(platformIsGpsPPSUsed()){
-        ppsTstamp     = platformGetCurrTimeStampFromIsr();
         ppsDetected   = 1;
     }
 
@@ -216,64 +337,48 @@ uint16_t N_per = 0;
 
 // Leave this in here for now so the change can be easily rolled back if
 //   something going forward doesn't work quite right.
-#define  TIM2_800Hz  1
 
-static uint8_t TIM2_Cntr      = 0;
-static uint8_t TIM2_CntrLimit = 3;  // 200 Hz Sampling
+//double         cntPeriod800;
 uint32_t       syncPulseTimeStamp = 0, syncPulsePeriod = 0, dacqTickTimeStamp = 0;
-double         cntPeriod800;
-BOOL   ppsSync            = FALSE;
-int    numAdjustments     = 0;
-int    adjustmentVal      = 0; 
-int    adjustmentValLast  = 0; 
-int    rem    = 0;
-int    divv   = 0;
-int    divva  = 0;
-int    ratioP = 0, ratioM = 0, adjStep = 0, adj1 = 0;
-BOOL   dir;
-BOOL   syncP  = FALSE;
 
 
+uint32_t syncOffset  = 0;
 int  nestedTim2  = 0;
 int  nestCntTim2 = 0;
+int  nestedTim5  = 0;
+int  nestCntTim5 = 0;
 void TIM2_IRQHandler(void)
 {
     nestedTim2 ++;
     if(nestedTim2 > 1){
         nestCntTim2++;
     }
+
     OSEnterISR();
     dacqTickTimeStamp = TIM5->CNT;
+    syncOffset = 0;
     
+    if(!ppsTstamp){
+        iTow          += 5000;    // in ms
+        iTowTstamp     = platformGetCurrTimeStampFromIsr();
+        solutionTstamp = iTow;
+    }else{
+        solutionTstamp = platformGetEstimatedITOWFromIsr();
+    }
+
+    adjustDacqSyncPhase();
     
-#if TIM2_800Hz
-// timer runs at 800 Hz
-    N_per = N_per + 1;
+//  timer runs at 200 Hz
+   N_per = N_per + 4;
     if( N_per >= 800 ) {
         N_per = 0;
     }
 
-    // New sampling method: 800 Hz Accel/800 Hz Rate-Sensor
-    TIM2_Cntr++;
-    if( TIM2_Cntr > TIM2_CntrLimit ) {
-        TIM2_Cntr = 0;
-
         // Upon TIM2 timeout, signal taskDataAcquisition() to continue
         osSemaphoreRelease(dataAcqSem);
-#if defined(DBC_FILE) || defined(SAE_J1939)
+#if defined(CAN_BUS_COMM)
         // Upon TIM2 timeout, signal taskDataCANComminication() to continue
         osSemaphoreRelease(canDataSem);
-#endif
-    }
-
-#else
-    // timer runs at 200 Hz
-    // Upon TIM2 timeout, signal taskDataAcquisition() to continue
-    osSemaphoreRelease(dataAcqSem);
-#if defined(DBC_FILE) || defined(SAE_J1939)
-        // Upon TIM2 timeout, signal taskDataCANComminication() to continue
-        osSemaphoreRelease(canDataSem);
-#endif
 #endif
 
     // reset the interrupt flag
@@ -289,18 +394,12 @@ void TIM2_IRQHandler(void)
 static uint8_t   TIM5_Cntr      = 0;
 static uint8_t   TIM5_CntrLimit = 4;  // 200 Hz Sampling
 static uint32_t  ref_min, ref_max;
-typedef struct{
-    uint32_t ppsTS;
-    uint32_t dacqTs;
-    int      delta;
-}pll_debug_t;
 
-pll_debug_t pllDbg[32];
-int pllDbgIdx = 0;
 
 #define  TS_FILT_SIZE 8
 uint32_t ppsFiltr[TS_FILT_SIZE] = {0,0,0,0,0,0,0,0};
-int      ppsFltIdx;
+int      syncFltIdx;
+int      syncFreq    = 0;
 /** ***************************************************************************
  * @name TIM5_IRQHandler()
  * @brief The value of the timer that triggers the interrupt (period) is based
@@ -316,38 +415,122 @@ void TIM5_IRQHandler(void)
     static uint8_t    freqValid = 0;
     static uint32_t   cap1 = 0, match = 0;
     static int        delta1 = 0;
+    static uint32_t   cap2, cnt = 0;
+    static uint32_t   syncPeriod = 0, syncAvg = 0;
+    static int delta, prevDelta = 0, err = 0, syncCnt = 0;
+    static int        refDelta = 0, diffVal;
+
     uint16_t          sr5  = TIM5->SR;
+    uint32_t          ts   = TIM5->CNT; 
     uint32_t          cap  = TIM5->CCR1;
+
+    nestedTim5 ++;
+    if(nestedTim5 > 1){
+        nestCntTim5++;
+    }
 
     OSEnterISR();
  
     if(sr5 & TIM_IT_CC1){
         while(1){
             if(freqValid){
+            // Here sync achieved - keep synced
+                if(syncFreq == 1000){
                 TIM5_Cntr++;   // Incremented at 1000 Hz
                 if( TIM5_Cntr > TIM5_CntrLimit ) {
                     // This loop is done at 200 Hz
                     TIM5_Cntr = 0;
+                        //  timer runs at 200 Hz
+                        N_per = N_per + 4;
+                        if( N_per >= 800 ) {
+                            N_per = 0;
+                        }
                     // signal taskDataAcquisition() to continue
                     osSemaphoreRelease(dataAcqSem);
-#ifdef CAN_BUS_COMM
-                    // Upon TIM5 timeout, signal taskDataCANComminication() to continue
+#if defined (CAN_BUS_COMM)
+                        // Upon TIM2 timeout, signal taskDataCANComminication() to continue
                     osSemaphoreRelease(canDataSem);
 #endif
                 }
                 break;
             }
+                // delta between two periods of sync signal 
             delta1 = cap - cap1;
             cap1   = cap; 
             if (delta1 < ref_min || delta1 > ref_max){
                 // disregard pulse and use previous numbers; 
-                match = 0;
+//                    DEBUG_STRING("Missed sync\n");
+                    resync = 1;
+                    syncP  = TRUE; 
+                    break;
+                }
+                platformSetPpsTimeStamp(ts);
+                syncAvg             -= ppsFiltr[syncFltIdx];
+                ppsFiltr[syncFltIdx] = delta1;
+                syncFltIdx++;
+                syncFltIdx          &= 0x7;
+                syncAvg             += delta1;
+                if(syncCnt < TS_FILT_SIZE){
+                    syncCnt ++;
+                    syncPeriod = delta1;
+                }else {
+                    syncPeriod = syncAvg >> 3;    // divide by 8
+                }
+                divv   = syncPeriod/200;
+                rem    = syncPeriod%200;
+                syncP  = TRUE; 
+                resync = 1;
+//                syncPulseTimeStamp = cap;
+                syncPulseTimeStamp = ts;
+                delta = syncPulseTimeStamp - dacqTickTimeStamp;
+                if(prevDelta){
+                    if(abs(prevDelta - delta) < 20){
+                        if(!refDelta){
+                            refDelta = delta;
+                        }
+                    }
+                }
+                prevDelta = delta;
+                diffVal   = refDelta - delta;
+                if(diffVal < 0){
+                    rem +=1;
+                }else{
+                    rem -=1;
+                }
+                cnt ++;
+//                DEBUG_UINT("\r\n", cnt);
+//                DEBUG_UINT(" ,"  , cap);
+//                DEBUG_INT(" ,"  ,  syncPeriod);
+//                DEBUG_INT(" ,"   , delta);
+//                DEBUG_INT(" ,"   , refDelta);
+//                DEBUG_INT(" , "  , divv);
+//                DEBUG_INT(" , "  , rem);
                 break;
             }
-            match ++;
+// Here sync not achieved yet
+            cap2               = cap1; 
+            cap1               = cap;
+            delta              = cap1 - cap2;
+            if(delta < 0){
+                err++;
+            }
+            if (delta > ref_min && delta < ref_max){
+                syncPulsePeriod = delta;
+                match++;
+                syncOffset++;
+            }else{
+                match = 0;
+            }
             if (match >= NUMBER_OF_FREQ_MATCHES) {
                 freqValid  = 1;
                 match      = 0;
+                if(syncFreq == 1000){
+                    TIM_Cmd(TIM2, DISABLE);  ///< TIM2 disable, start to sync from here
+                    uint16_t sr2  = TIM2->SR;
+                    // reset the interrupt flag
+                    TIM2->SR &= ~sr2;
+                    TIM5_Cntr = syncOffset;    
+                }
             }
             break;
         }
@@ -361,6 +544,7 @@ void TIM5_IRQHandler(void)
     TIM5->SR &= ~sr5;
 
     OSExitISR();
+    nestedTim5--;
 }
 
 
@@ -379,9 +563,13 @@ void InitClockMeasurementTimer(uint32_t freq)
     TIM_ICInitTypeDef       TIM_ICInitStruct;
     NVIC_InitTypeDef        NVIC_InitStructure;
 
-    if(freq != 1000){
-        // so far just 1000 Hz supported 
-        return;
+
+    if(platformIsGpsPPSUsed()){
+        freq     = 1;       // 1Hz sync
+        syncFreq = 1;
+    }else{
+        freq = 1000;    // 1000 Hz sync
+        syncFreq = 1000;
     }
 
     ref_min = (uint32_t)( ((float)SystemCoreClock/(freq*2))  * (1.0 - EXT_CLK_TEST_PRECISION));
@@ -423,8 +611,8 @@ void InitClockMeasurementTimer(uint32_t freq)
 void DataAquisitionStart(void)
 {
     // Configure and enable timers
-    InitClockMeasurementTimer(1000);
-    InitDataAcquisitionTimer(800);
+    InitClockMeasurementTimer(1);
+    InitDataAcquisitionTimer(200);
 
      /// Enable external sync 1 PPS A0 interrupt
     if(!BoardIsTestMode()){

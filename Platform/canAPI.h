@@ -30,5 +30,8 @@ limitations under the License.
 
 void InitCommunication_UserCAN(int baudRate);
 void InitCANBoardConfiguration_GPIO();
+void ConfigureCANMessageFilters(void);
+void ConfigureCANMessageFilter(uint32_t baseID, uint32_t baseMask);
+void ProcessDataPackets(void *dsc);
 
 #endif
