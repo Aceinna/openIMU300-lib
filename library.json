@@ -1,31 +1,30 @@
 {
-	"name": "OpenIMU300-base-library",
- 	"version": "1.0.8",
- 	"description": "OpenIMU300 Base Library",
-    "keywords": "sensors, IMU, INS, AI, automotive, navigation",
- 	"repository":
-    {
-       "type": "git",
-       "url": "https://github.com/Aceinna/openIMU300-lib.git",
-       "branch": "master"
-    },
-	"build": {
- 		"flags": [
-			"-L Sensors",
-			"-l libSensors.a",
-			"-I Sensors",
-			"-I Platform/CAN/include",
-			"-I Platform/Filter/include",
-			"-I Platform/Board/include",
-			"-I Platform/Core/include",
-			"-I Platform",
-			"-I STM32F405/include",
-			"-I STM32F405/CMSIS",
-			"-I STM32F405",
- 			"-I FreeRTOS_M4",
-			"-I FreeRTOS/include"
-		],
-		"libArchive": false,
-        "platforms": "aceinna_imu"
- 	}
- }
+  "name": "OpenIMU300-base-library",
+  "version": "1.0.8",
+  "description": "OpenIMU300 Base Library",
+  "keywords": "sensors, IMU, INS, AI, automotive, navigation",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Aceinna/openIMU300-lib.git",
+    "branch": "master"
+  },
+  "build": {
+    "flags": [
+      "-L Sensors",
+      "-l libSensors.a",
+      "-I Sensors",
+      "-I Platform/CAN/include",
+      "-I Platform/Filter/include",
+      "-I Platform/Board/include",
+      "-I Platform/Core/include",
+      "-I Platform",
+      "-I STM32F405/include",
+      "-I STM32F405/CMSIS",
+      "-I STM32F405",
+      "-I FreeRTOS_M4",
+      "-I FreeRTOS/include"
+    ],
+    "libArchive": false
+  }
+  "platforms": "aceinna_imu"
+}
