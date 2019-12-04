@@ -95,7 +95,7 @@ uint64_t   platformGetCurrTimeStamp();
 uint64_t   platformGetCurrTimeStampFromIsr();
 uint64_t   platformGetDacqTimeStamp();
 void       platformSetDacqTimeStamp(uint64_t time);
-uint8_t    platformGetPpsFlag( void );
+BOOL       platformGetPpsFlag(BOOL fClear);
 void       platformSetPpsFlag( uint8_t gotPpsFlag );
 uint64_t   platformGetPpsTimeStamp();
 void       platformForceMagUsage();
@@ -106,12 +106,15 @@ void       platformUpdateRateFilterType(uint8_t type);
 void       platformUpdateAccelFilterType(uint8_t type);
 int        platformGetPreFilterType();
 int        platformGetFilterCounts(uint32_t type);
-int        platformGetFilterType(int sensor);
+int        platformGetFilterType(int sensor, BOOL fSpi);
 uint32_t   platformGetIMUCounter();
 void       platformUpdateITOW(uint32_t itow);
 uint64_t   platformGetEstimatedITOW();
 void       platformDetectUserSerialCmd(uint8_t input);
 uint64_t   platformGetSolutionTstamp();
+double     platformGetSolutionTstampAsDouble();
+uint32_t   platformGetItow(BOOL *detected, BOOL *updated);
+uint32_t   platformGetGpsItow();
 
 
 

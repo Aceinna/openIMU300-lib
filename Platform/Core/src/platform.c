@@ -1146,7 +1146,7 @@ void platformEnableMagFilter(BOOL enable)
 
 // borrowing the AnalogFilterClocks from the configuration to allow
 // the filtering to be changed on the fly.
-int  platformGetFilterType(int sensor)
+int  platformGetFilterType(int sensor, BOOL fSpi)
 {
     int counts;
 
@@ -1156,6 +1156,10 @@ int  platformGetFilterType(int sensor)
         counts = gConfiguration.analogFilterClocks[2];
     }else{
         return -1;
+    }
+    
+    if(fSpi){
+        return counts;
     }
 
     if (counts > 18749 ) {

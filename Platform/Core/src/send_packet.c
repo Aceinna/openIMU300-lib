@@ -1155,8 +1155,14 @@ void SendUcbPacket (UcbPacketStruct    *ptrUcbPacket)
  ******************************************************************************/
 void SendContinuousPacket (int dacqRate)
 {
+    static  BOOL synced = FALSE;
     uint8_t type [UCB_PACKET_TYPE_LENGTH];
     uint16_t divider = platformConvertPacketRateDivider(gConfiguration.packetRateDivider);
+    
+    if(!synced && dacqRate == 0){
+        synced = TRUE;
+        divideCount = 1;
+    }
 
     if (divider != 0) { ///< check for quiet mode
         if (divideCount == 1) {

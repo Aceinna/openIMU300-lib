@@ -213,6 +213,11 @@ extern uint8_t  getSensorRange();
 extern BOOL ValidPortConfiguration (ConfigurationStruct *proposedConfiguration);
 extern void magDetected(BOOL detected);
 extern uint32_t GetPreFilter(uint32_t counts);
+// SPI bus related functions
+void        configSetRateSensorFilterTypeForSPI(uint16_t type);
+void        configSetAccelSensorFilterTypeForSPI(uint16_t type);
+uint16_t    configGetRateSensorFilterTypeForSPI();
+uint16_t    configGetAccelSensorFilterTypeForSPI();
 
 #endif
 

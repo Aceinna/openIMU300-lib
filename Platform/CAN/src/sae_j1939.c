@@ -541,6 +541,7 @@ uint8_t is_valid_pf(uint8_t pf_val)
       (pf_val == SAE_J1939_PDU_FORMAT_ADDRESS_CLAIM) ||
       (pf_val == SAE_J1939_PDU_FORMAT_ECU) ||
       (pf_val == SAE_J1939_PDU_FORMAT_254) ||
+      (pf_val == SAE_J1939_PDU_FORMAT_251) ||
       (pf_val == SAE_J1939_PDU_FORMAT_GLOBAL))
       return 1;
        
@@ -706,6 +707,22 @@ ACEINNA_J1939_PACKET_TYPE is_algorithm_data_packet(SAE_J1939_IDENTIFIER_FIELD *i
        return ACEINNA_J1939_DATA;
   }
   
+  if ((pf_val == SAE_J1939_PDU_FORMAT_251) &&
+      (ps_val == SAE_J1939_PDU_SPECIFIC_246)){
+       return ACEINNA_J1939_DATA;
+  }
+
+  if ((pf_val == SAE_J1939_PDU_FORMAT_GLOBAL) && 
+        (
+            (ps_val == SAE_J1939_PDU_SPECIFIC_110) ||
+            (ps_val == SAE_J1939_PDU_SPECIFIC_111) ||
+            (ps_val == SAE_J1939_PDU_SPECIFIC_112)
+        )
+      ){
+       return ACEINNA_J1939_DATA;
+  }
+
+
   return ACEINNA_J1939_IGNORE;
 }
 

@@ -83,6 +83,7 @@ typedef struct {
 #define SAE_J1939_PDU_FORMAT_248                     248
 #define SAE_J1939_PDU_FORMAT_ECU                     253
 #define SAE_J1939_PDU_FORMAT_254                     254	
+#define SAE_J1939_PDU_FORMAT_251                     251	
 #define SAE_J1939_PDU_FORMAT_GLOBAL                  255
 
 #define SAE_J1939_PDU_FORMAT_ACK                     232
@@ -98,6 +99,10 @@ typedef struct {
 #define SAE_J1939_PDU_SPECIFIC_232                   232	// 65256 Vehicle Direction/Speed
 #define SAE_J1939_PDU_SPECIFIC_1                     1
 #define SAE_J1939_PDU_SPECIFIC_2                     2
+#define SAE_J1939_PDU_SPECIFIC_246                   246	// 654502 Vehicle GNSS DOP
+#define SAE_J1939_PDU_SPECIFIC_110                   110	// 65390  CUSTOM_GNSS_TIME
+#define SAE_J1939_PDU_SPECIFIC_111                   111	// 65391  CUSTOM_GNSS_FIX
+#define SAE_J1939_PDU_SPECIFIC_112                   112	// 65392  CUSTOM_GNSS_DOP
 
 
 // J1939 PS definition
@@ -136,8 +141,8 @@ typedef struct {
 #define SAE_J1939_ACCELERATION_PRIORITY              2
 #define SAE_J1939_SLOPE_PRIORITY                     3
 #define SAE_J1939_POSITION_PRIORITY                  6
-#define SAE_J1939_ATTITUDE_PRIORITY                  3
-#define SAE_J1939_RUPDATE_PRIORITY                   3
+#define SAE_J1939_ATTITUDE_PRIORITY                  6
+#define SAE_J1939_RUPDATE_PRIORITY                   6
 
 // J1939 message page number, currently uses 0
 #define SAE_J1939_DATA_PAGE                          0
@@ -248,9 +253,9 @@ enum {
   ACEINNA_SAE_J1939_PACKET_MAG              =           0x08,   // mag
   ACEINNA_SAE_J1939_PACKET_LATLONG          =           0x10,   // Lattitude, longitude
   ACEINNA_SAE_J1939_PACKET_HEADING          =           0x20,   // Heading
-  ACEINNA_SAE_J1939_PACKET_RAPID_UPDATE     =           0x40,   // Rapid Update
+  ACEINNA_SAE_J1939_PACKET_RAPID_COURSE_UPDATE      =           0x40,   // Rapid Course Update
   ACEINNA_SAE_J1939_PACKET_ATTITUDE         =           0x80,   // Attitude
-  ACEINNA_SAE_J1939_PACKET_POSITION_UPDATE  =           0x100   // Rapid position Update
+  ACEINNA_SAE_J1939_PACKET_RAPID_POSITION_UPDATE    =           0x100   // Rapid position Update
 };
  
 
@@ -426,8 +431,8 @@ typedef struct {
 // PGN 65267
 // PGN 129025 
 typedef struct {
-    int32_t    latitude;                            // gps latitude  0.0000001 deg/bit
-    int32_t    longitude;                           // gps longitude 0.0000001 deg/bit
+    uint32_t    latitude;                            // gps latitude  0.0000001 deg/bit
+    uint32_t    longitude;                           // gps longitude 0.0000001 deg/bit
 } GPS_DATA;
 
 // Vehicle Direction/Speed
@@ -438,6 +443,20 @@ typedef struct {
     int16_t    pitch;             // 0.0078125  deg/bit
     int16_t    altitude;          // 0.125      m/bit
 }DIR_SPEED_DATA;
+
+// Vehicle GNSS dop
+// PGN 64502
+typedef struct {
+    int8_t     numSats;           // Number Of Sattelites
+    int8_t     HDOP;              // Horizontal Dilution of Precision - 1 count/bit
+    int8_t     VDOP;              // Vertical Dilution of Precision   - 0.1 / bit
+    int8_t     PDOP;              // Position Dilution of Precision   - 0.1 / bit
+    int8_t     TDOP;              // Time Dilution of Precision       - 0.1 / bit
+    int8_t     rsvd1;             // 
+    int8_t     rsvd2;             // 
+    int8_t     rsvd3;             // 
+}GNSS_DOP_DATA;
+
 
 // Wheel speed data
 // PGN 65215
@@ -462,7 +481,7 @@ typedef struct{
 	int16_t 	COG;                    // course over ground  0.0001 rad/bit  
 	int16_t 	SOG;                    // speed  over ground  0.01   m/s/ bit
 	int16_t 	Rsvd;   				// 0xFFFF             
-}RAPID_UPDATE_DATA;
+}COURSE_RAPID_UPDATE_DATA;
 
 // Attitude
 // PGN 127257
@@ -473,6 +492,33 @@ typedef struct{
 	int16_t Roll;						// 0.0001 rad/bit
 	uint8_t Rsvd;
 }ATTITUDE_DATA;
+
+// GNSS Custom message 1
+// PGN 65392
+typedef struct{
+    uint16_t hAcc;                      // /1000 m, if > 65535 -> 65535 , horizontal accuracy estimate
+    uint16_t vAcc;                      // /1000 m, if > 65535 -> 65535 , vertical accuracy estimate
+    uint16_t pDOP;                      // ++ scaling is 0.01, position DOP
+    int16_t  headMot;                   // *182/100000 deg, 
+}CUSTOM_GNSS_DOP_DATA;
+
+// GNSS Custom message 2
+// PGN 65391
+typedef struct{
+    uint8_t numSV;                      //  number of satellites in Nav solution;
+    uint8_t flags;                      //  
+    uint8_t valid;                      // Validity flags
+    uint8_t fixType;                    // GNSS fix type
+    int32_t height;                     // mm, height above ellipsoid;
+}CUSTOM_GNSS_FIX_DATA;
+
+// GNSS Custom message 2
+// PGN 65391
+typedef struct{
+    uint32_t iTOW;                      // ms
+    int32_t gSpeed;                     // mm/s, groud speed (2-D)
+}CUSTOM_GNSS_TIME_DATA;
+
 
 #pragma pack ()
 
@@ -681,9 +727,9 @@ extern uint8_t aceinna_j1939_send_digital_filter(uint8_t accel_cutoff, uint8_t r
 extern uint8_t aceinna_j1939_send_orientation( uint8_t *orien);
 extern uint8_t aceinna_j1939_send_mags(MAGNETIC_SENSOR * data);
 extern uint8_t aceinna_j1939_send_GPS(GPS_DATA * data);
-extern uint8_t aceinna_j1939_send_rapid_updates(RAPID_UPDATE_DATA * data);
+extern uint8_t aceinna_j1939_send_course_rapid_update(COURSE_RAPID_UPDATE_DATA * data);
 extern uint8_t aceinna_j1939_send_attitude(ATTITUDE_DATA * data);
-extern uint8_t aceinna_j1939_send_position_update(GPS_DATA * data);
+extern uint8_t aceinna_j1939_send_position_rapid_update(GPS_DATA * data);
 extern uint8_t aceinna_j1939_build_msg(void *payload, msg_params_t *params);
 
 
@@ -706,6 +752,13 @@ extern BOOL      UseAlgorithm();
 // PS 0xA0 - 0xBF and 0xE0 - 0xFF
 #define VEHICLE_DATA_ID_BASE          0x18FEA000
 #define VEHICLE_DATA_FILTER_BASE_MASK 0x18FEA000
+
+// priority 6
+// PF 251
+// PS 0xA0 - 0xBF and 0xE0 - 0xFF
+#define VEHICLE_DATA1_ID_BASE          0x18FBF000
+#define VEHICLE_DATA1_FILTER_BASE_MASK 0x18FBF000
+
 
 // priority 6
 // PF 255

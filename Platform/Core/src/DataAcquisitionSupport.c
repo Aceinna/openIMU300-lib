@@ -66,18 +66,25 @@ typedef struct {
 
 static uint32_t prevTim5Val    = 0;
 static uint64_t ppsTstamp      = 0;
+static int64_t  ppsTstampFull      = 0;
+static int64_t  dacqTstampFull     = 0;
 static uint64_t solutionTstamp = 0;
+static int64_t  solutionTstampFull    = 0;
+static int64_t  solutionPpsTstampFull  = 0;
 static uint64_t iTowTstamp     = 0;
 static uint64_t prevItow       = 0;
 static uint64_t iTow = 0;
-
+static uint32_t numTicksInPps         = 59947833;
+static BOOL     iTowUpdated           = FALSE;
 stime_t tStamp;
-
+static  uint8_t  ppsDetected           =  0; // 0 not synced, 1 synced
+static  uint8_t  solutionPpsDetected   =  0; // 0 not synced, 1 synced
+static uint32_t  gpsItow;
 // value in microseconds
 uint64_t platformGetCurrTimeStamp()
 {
     OSDisableHook();
-    uint32_t cur =  TIM_GetCounter(TIM5);
+    uint32_t cur =  TIM5->CNT;
     if(cur < prevTim5Val){
         tStamp.timeHi++;
     }
@@ -90,13 +97,36 @@ uint64_t platformGetCurrTimeStamp()
 
 uint64_t platformGetCurrTimeStampFromIsr()
 {
-    uint32_t cur =  TIM_GetCounter(TIM5);
+    uint32_t cur =  TIM5->CNT;
     if(cur < prevTim5Val){
         tStamp.timeHi++;
     }
     tStamp.timeLo = cur; 
     prevTim5Val   = cur;
     return tStamp.time / 60;
+}
+
+uint64_t platformGetFullTimeStampFromIsr()
+{
+    uint32_t cur =  TIM5->CNT;
+    if(cur < prevTim5Val){
+        tStamp.timeHi++;
+    }
+    tStamp.timeLo = cur; 
+    prevTim5Val   = cur;
+    return tStamp.time / 60;
+}
+
+
+uint64_t platformGetCurrTicksFromIsr()
+{
+    uint32_t cur =  TIM5->CNT;
+    if(cur < prevTim5Val){
+        tStamp.timeHi++;
+    }
+    tStamp.timeLo = cur; 
+    prevTim5Val   = cur;
+    return tStamp.time;
 }
 
 
@@ -127,38 +157,57 @@ void  platformSetPpsTimeStamp(uint32_t tmr)
         iTow     = prevItow;
         prevItow = 0;
     }
-   
+    ppsTstampFull = tStamp.time;
     iTow += 1000000;
+    ppsDetected  = 1;
+//    if(ppsTstampFull > solutionTstampFull && (ppsTstampFull - solutionTstampFull) < 600){   // 10 uS
+//        solutionPpsTstampFull = ppsTstampFull; 
+//        solutionPpsDetected   = TRUE;
+//    }
 }
 
 
+BOOL platformGetPpsFlag( bool fClear) { 
+    BOOL detected;
+    OSDisableHook();
+    detected    = solutionPpsDetected;
+    if(fClear){
+        solutionPpsDetected = FALSE;
+    }
+    OSEnableHook();
+    return detected; 
+}
 
 
-uint32_t prevTs = 0;
-
-static uint8_t  ppsDetected  =  0; // 0 not synced, 1 synced
-uint8_t getPpsFlag( void ) { return ppsDetected; } // dmu.h
-void    setPpsFlag( uint8_t gotPpsFlag ) { ppsDetected = gotPpsFlag; }
-uint8_t platformGetPpsFlag( void ) { return ppsDetected; } // dmu.h
-void    platformSetPpsFlag( uint8_t gotPpsFlag ) { ppsDetected = gotPpsFlag; }
-
+int    updErrCnt = 0;
 
 void    platformUpdateITOW(uint32_t itow)
 {
-    uint64_t tStamp = platformGetCurrTimeStamp();
-    uint32_t ddd    = tStamp - ppsTstamp; 
+    OSDisableHook();
 
-    if(ddd > 900000){
-        // > 0.9 seconds - disregard ITOW, wait for next
-        return; 
-    }   
+    uint64_t tStamp        = platformGetCurrTicksFromIsr();
+    int64_t  ddd           = (tStamp - ppsTstampFull); 
+    double   numTicksPerUs = (double)numTicksInPps/1000000;
+    double   offset        = (double)ddd/numTicksPerUs;
 
+    if(offset < 900000.0){
+        iTowUpdated  = TRUE;
     prevItow = (uint64_t)itow * 1000;     // microsecond resolution
+        gpsItow      = itow;
+    }else{
+        updErrCnt++;
+        updErrCnt &= 0x0f;
+        prevItow = 0;
+    }
+
+    OSEnableHook();
+
 }
 
 uint64_t platformGetEstimatedITOW()
 {
-    uint64_t tStamp = platformGetCurrTimeStamp();
+    OSDisableHook();
+    uint64_t tStamp = platformGetCurrTimeStampFromIsr();
     uint64_t ddd;; 
 
     if(!ppsTstamp){
@@ -166,9 +215,27 @@ uint64_t platformGetEstimatedITOW()
     }else{
         ddd = tStamp - ppsTstamp; 
     }
+    OSEnableHook();
 
     return iTow + ddd;
 }
+
+uint32_t platformGetItow(BOOL *detected, BOOL *updated)
+{
+    OSDisableHook();
+    uint32_t res         = iTow/1000;
+    *detected            = solutionPpsDetected;
+    *updated             = iTowUpdated;
+    iTowUpdated          = 0;
+    OSEnableHook();
+    return res;
+}
+
+uint32_t platformGetGpsItow()
+{
+    return gpsItow;
+}
+
 
 uint64_t platformGetEstimatedITOWFromIsr()
 {
@@ -185,30 +252,42 @@ uint64_t platformGetEstimatedITOWFromIsr()
 }
 
 
-uint64_t platformGetSolutionTstamp()
+int      itowErrCnt = 0; 
+uint64_t lastItow   = 0;
+
+double platformGetSolutionTstampAsDouble()
 {
-    return solutionTstamp;
+    if(ppsTstampFull == 0){
+        return 0;
+    }
+    double res;
+    OSDisableHook();
+    int64_t  ddd = solutionTstampFull - solutionPpsTstampFull;
+    double   numTicksPerUs = (double)numTicksInPps/1000000;
+    double   offset = (double)ddd/numTicksPerUs;
+    if((offset > 1006000.0 || offset < 0 )&& numTicksPerUs != 0 && iTow != lastItow){
+        itowErrCnt++;
+    }
+    lastItow = iTow;
+    res      = (double)iTow + offset; 
+    OSEnableHook();
+    return res;
 }
 
-//BOOL   ppsSync            = FALSE;
-int    numAdjustments     = 0;
-int    adjustmentVal      = 0; 
-int    adjustmentValLast  = 0; 
-int    rem    = 0;
-int    divv   = 0;
+BOOL   syncP  = FALSE;
+BOOL   resync = FALSE;
+int    rem    = 17;
+int    divv   = 299739;
 int    divva  = 0;
 int    ratioP = 0, ratioM = 0, adjStep = 0, adj1 = 0;
 BOOL   dir;
-BOOL   syncP  = FALSE;
-BOOL   resync = FALSE;
-
 
 void adjustDacqSyncPhase()
 {
     int ddd;
 
     // no valid sync pulse detected
-    // keep ols settings
+    // keep old settings
 
     if(!syncP){
         return;
@@ -226,7 +305,6 @@ void adjustDacqSyncPhase()
     
     if(ratioP && dir){
         ddd  = divva + adj1;
-        adj1 = 0;
         if(ratioM){
             dir ^= 1;
         }
@@ -260,7 +338,7 @@ void ONE_PPS_EXTI_IRQHandler(void)
     OSEnterISR();
 
     if(platformIsGpsPPSUsed()){
-        ppsDetected   = 1;
+//         ppsDetected  = 1;
     }
 
     EXTI->PR = ONE_PPS_EXTI_LINE;  ///< Clear the interrupt bit
@@ -296,6 +374,7 @@ void InitDataAcquisitionTimer(uint32_t outputDataRate)
     /// to sync with a 1PPS or 1kHz signal. ==> SystemCoreClock = 120MHz
     period = (double)( SystemCoreClock ); // >> 1; ///< period = 120 MHz / 2 = 60 MHz
     period = 0.5 * period / (double)outputDataRate;    ///< = period / ODR ==> 60 MHz / 500 Hz = 120,000
+    numTicksInPps =  SystemCoreClock/2;                
 
     /// Time base configuration
     TIM_TimeBaseStructInit( &TIM_TimeBaseStructure );
@@ -320,6 +399,54 @@ void InitDataAcquisitionTimer(uint32_t outputDataRate)
 }
 
 
+int deltaBuf[256] = {0};
+int deltaIdx = 0;
+
+
+void calculateSyncPhaseShift()
+{
+    int64_t        delta;
+    static int     lock1 = 0, lock2 = 0, lock3 = 0;
+
+    if(!ppsDetected){
+        return; 
+    }
+
+    delta = solutionTstampFull - solutionPpsTstampFull; 
+    deltaBuf[deltaIdx++] = delta;
+    deltaIdx &= 0xff;
+
+    if(!lock1){
+        if(delta < 10000){
+            // try to properly position phase shift
+            adjStep = 50;
+    }else{
+        lock1    = 1;
+            adjStep = -20;
+    }
+    }else if(!lock2){
+        if(delta > 6000){
+           adjStep = -20;
+        }else {
+            lock2   = 1;
+            adjStep = -10;
+        }
+    }else if(!lock3){
+        if(delta > 3000){
+           adjStep = -5;
+        }else {
+            lock3   = 1;
+        adjStep = 0;
+    }
+    }else {
+        if(delta > 2400){
+            rem -= 3;
+    }else{
+            rem += 3;
+        }
+    }
+
+}                
 
 
 
@@ -339,14 +466,15 @@ uint16_t N_per = 0;
 //   something going forward doesn't work quite right.
 
 //double         cntPeriod800;
-uint32_t       syncPulseTimeStamp = 0, syncPulsePeriod = 0, dacqTickTimeStamp = 0;
+uint32_t    syncPulsePeriod = 0;
 
 
-uint32_t syncOffset  = 0;
+uint32_t syncOffset  = 0;//, tmr;
 int  nestedTim2  = 0;
 int  nestCntTim2 = 0;
 int  nestedTim5  = 0;
 int  nestCntTim5 = 0;
+int  numDacqCycles   = 0;  
 void TIM2_IRQHandler(void)
 {
     nestedTim2 ++;
@@ -355,9 +483,9 @@ void TIM2_IRQHandler(void)
     }
 
     OSEnterISR();
-    dacqTickTimeStamp = TIM5->CNT;
     syncOffset = 0;
     
+
     if(!ppsTstamp){
         iTow          += 5000;    // in ms
         iTowTstamp     = platformGetCurrTimeStampFromIsr();
@@ -366,7 +494,26 @@ void TIM2_IRQHandler(void)
         solutionTstamp = platformGetEstimatedITOWFromIsr();
     }
 
+    solutionTstampFull   = tStamp.time;
+    dacqTstampFull       = tStamp.time;
+
+    if(platformIsGpsPPSUsed() && syncP){
+        if(ppsDetected){
+            solutionPpsTstampFull   = ppsTstampFull;
+            solutionPpsDetected     = ppsDetected;
+            calculateSyncPhaseShift();
+            resync = 1; 
+            numDacqCycles = 0;
+        }else{
+            numDacqCycles++;
+            numDacqCycles %= 200;
+            if(numDacqCycles == 0){
+                resync = 1;
+            }
+        }
     adjustDacqSyncPhase();
+        ppsDetected = FALSE;
+    }
     
 //  timer runs at 200 Hz
    N_per = N_per + 4;
@@ -395,11 +542,17 @@ static uint8_t   TIM5_Cntr      = 0;
 static uint8_t   TIM5_CntrLimit = 4;  // 200 Hz Sampling
 static uint32_t  ref_min, ref_max;
 
-
 #define  TS_FILT_SIZE 8
 uint32_t ppsFiltr[TS_FILT_SIZE] = {0,0,0,0,0,0,0,0};
 int      syncFltIdx;
 int      syncFreq    = 0;
+int      missedPulseCnt = 0;
+int      missedPulseIdx = 0;
+uint32_t missedPulseTab[1024] = {0};
+
+
+
+
 /** ***************************************************************************
  * @name TIM5_IRQHandler()
  * @brief The value of the timer that triggers the interrupt (period) is based
@@ -417,21 +570,26 @@ void TIM5_IRQHandler(void)
     static int        delta1 = 0;
     static uint32_t   cap2, cnt = 0;
     static uint32_t   syncPeriod = 0, syncAvg = 0;
-    static int delta, prevDelta = 0, err = 0, syncCnt = 0;
-    static int        refDelta = 0, diffVal;
+    static int        delta, err = 0, syncCnt = 0;
+    static uint16_t   sr5;
+    static uint32_t   ts;
+    static uint32_t   cap;
 
-    uint16_t          sr5  = TIM5->SR;
-    uint32_t          ts   = TIM5->CNT; 
-    uint32_t          cap  = TIM5->CCR1;
 
     nestedTim5 ++;
+
     if(nestedTim5 > 1){
         nestCntTim5++;
     }
 
     OSEnterISR();
  
+    sr5  = TIM5->SR;
+
     if(sr5 & TIM_IT_CC1){
+        //    ts   = TIM5->CNT; 
+        cap  = TIM5->CCR1;
+        ts   = cap; 
         while(1){
             if(freqValid){
             // Here sync achieved - keep synced
@@ -459,9 +617,10 @@ void TIM5_IRQHandler(void)
             cap1   = cap; 
             if (delta1 < ref_min || delta1 > ref_max){
                 // disregard pulse and use previous numbers; 
-//                    DEBUG_STRING("Missed sync\n");
-                    resync = 1;
-                    syncP  = TRUE; 
+                    missedPulseCnt++;
+                    missedPulseTab[missedPulseIdx++] = delta1;
+//                    DEBUG_INT("Missed sync\n", missedPulseIdx);
+                    missedPulseIdx &= 0x3ff;
                     break;
                 }
                 platformSetPpsTimeStamp(ts);
@@ -476,27 +635,11 @@ void TIM5_IRQHandler(void)
                 }else {
                     syncPeriod = syncAvg >> 3;    // divide by 8
                 }
+                numTicksInPps = syncPeriod; 
                 divv   = syncPeriod/200;
                 rem    = syncPeriod%200;
                 syncP  = TRUE; 
                 resync = 1;
-//                syncPulseTimeStamp = cap;
-                syncPulseTimeStamp = ts;
-                delta = syncPulseTimeStamp - dacqTickTimeStamp;
-                if(prevDelta){
-                    if(abs(prevDelta - delta) < 20){
-                        if(!refDelta){
-                            refDelta = delta;
-                        }
-                    }
-                }
-                prevDelta = delta;
-                diffVal   = refDelta - delta;
-                if(diffVal < 0){
-                    rem +=1;
-                }else{
-                    rem -=1;
-                }
                 cnt ++;
 //                DEBUG_UINT("\r\n", cnt);
 //                DEBUG_UINT(" ,"  , cap);
@@ -589,7 +732,7 @@ void InitClockMeasurementTimer(uint32_t freq)
     
 //    Enable the TIM5 global interrupt, TIM5_IRQn
     NVIC_InitStructure.NVIC_IRQChannel                   = TIM5_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x2;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority        = 0x0;
     NVIC_InitStructure.NVIC_IRQChannelCmd                = ENABLE;
     NVIC_Init( &NVIC_InitStructure );

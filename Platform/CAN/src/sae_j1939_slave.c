@@ -422,7 +422,7 @@ uint8_t aceinna_j1939_send_GPS(GPS_DATA * data)
  * @param [in] data, position data type
  * @retval 1 successful or 0 failure
  ******************************************************************************/    
-uint8_t aceinna_j1939_send_position_update(GPS_DATA * data)
+uint8_t aceinna_j1939_send_position_rapid_update(GPS_DATA * data)
 {
   	msg_params_t params;
   
@@ -467,7 +467,7 @@ uint8_t aceinna_j1939_send_attitude(ATTITUDE_DATA * data)
  * @param [in] data, attitude data type
  * @retval 1 successful or 0 failure
  ******************************************************************************/    
-uint8_t aceinna_j1939_send_rapid_updates(RAPID_UPDATE_DATA * data)
+uint8_t aceinna_j1939_send_course_rapid_update(COURSE_RAPID_UPDATE_DATA * data)
 {
   	msg_params_t params;
 
@@ -503,6 +503,8 @@ uint8_t aceinna_j1939_build_msg(void *payload, msg_params_t *params)
   // header of acceleration packet
   desc->tx_pkt_type                         = params->pkt_type;
   desc->tx_identifier.control_bits.priority = params->priority;
+  desc->tx_identifier.control_bits.data_page = params->data_page;
+  desc->tx_identifier.control_bits.ext_page  = params->ext_page;
   desc->tx_identifier.pdu_format            = params->PF;
   desc->tx_identifier.pdu_specific          = params->PS;
   desc->tx_payload_len                      = params->len;
