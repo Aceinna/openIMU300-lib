@@ -1,6 +1,6 @@
 {
 	"name": "Platform",
- 	"version": "1.0.8",
+ 	"version": "1.0.10",
  	"description": "OpenIMU300 platform Library",
  	"build": {
  		"flags": [

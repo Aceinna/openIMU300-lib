@@ -40,7 +40,7 @@ extern uint32_t userCommunicationType;
 extern void setUserCommunicationType(uint32_t);
 uint32_t PacketRateCounter = 0;
 uint32_t CanLoopCounter    = 0;
-
+BOOL canStarted            = FALSE;
 
 _ECU_BAUD_RATE baudRate; 
 #define SAE_J1939_HEART_BEAT 2  // packets at 100 Hz
@@ -72,6 +72,8 @@ void TaskCANCommunicationJ1939(void const *argument)
     
     sae_j1939_initialize(baudRate, address);
     
+    // deactivate semaphore if active 
+    res = osSemaphoreWait(canDataSem, 0);
     // Main loop for the task
     while( 1 )
     {  
@@ -95,7 +97,7 @@ void TaskCANCommunicationJ1939(void const *argument)
             gEcuInst.state = _ECU_CHECK_ADDRESS; 
         }
 
-
+        canStarted = TRUE;        
 
         // address claiming state
         if ((gEcuInst.state == _ECU_CHECK_ADDRESS) || (gEcuInst.state == _ECU_WAIT_ADDRESS)|| !(CanLoopCounter % 200)) {

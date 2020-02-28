@@ -50,11 +50,11 @@ limitations under the License.
 #define DEBUG_USART_DMA                    DMA2
 #define DEBUG_USART_DMA_CLK                RCC_AHB1Periph_DMA2
 #define DEBUG_USART_DMA_CHANNEL            DMA_Channel_4
-#define DEBUG_USART_DMA_RX_STREAM          DMA2_Stream2
+#define DEBUG_USART_DMA_RX_STREAM          DMA2_Stream5
 #define DEBUG_USART_DMA_TX_STREAM          DMA2_Stream7
-#define DEBUG_USART_DMA_RX_STREAM_IRQ      DMA2_Stream2_IRQn
+#define DEBUG_USART_DMA_RX_STREAM_IRQ      DMA2_Stream5_IRQn
 #define DEBUG_USART_DMA_TX_STREAM_IRQ      DMA2_Stream7_IRQn
-#define DEBUG_USART_DMA_RX_IRQHandler      DMA2_Stream2_IRQHandler
+#define DEBUG_USART_DMA_RX_IRQHandler      DMA2_Stream5_IRQHandler
 #define DEBUG_USART_DMA_TX_IRQHandler      DMA2_Stream7_IRQHandler
 
 #define DEBUG_USART_DMA_TX_FLAGS          (DMA_FLAG_FEIF7  | \
@@ -63,54 +63,57 @@ limitations under the License.
                                            DMA_FLAG_HTIF7  | \
                                            DMA_FLAG_TCIF7 )
 
-#define DEBUG_USART_DMA_RX_FLAGS          (DMA_FLAG_FEIF2  | \
-                                           DMA_FLAG_DMEIF2 | \
-                                           DMA_FLAG_TEIF2  | \
-                                           DMA_FLAG_HTIF2  | \
-                                           DMA_FLAG_TCIF2    )
+#define DEBUG_USART_DMA_RX_FLAGS          (DMA_FLAG_FEIF5  | \
+                                           DMA_FLAG_DMEIF5 | \
+                                           DMA_FLAG_TEIF5  | \
+                                           DMA_FLAG_HTIF5  | \
+                                           DMA_FLAG_TCIF5    )
 
 
 ///**********************************************************************
 /// == user-communications protocol as UART ==
 /// The User pins can be SPI (MOSI, MISO, CLK, Select or two UARTS
 ///   (4 and 5) or a USART and a UART(3 and 5)
+
 #define kUserA_UART                        0 // where it is in the uart.c gUartConfig structure
-#define USER_A_UART                        UART4
-#define USER_A_UART_CLK                    RCC_APB1Periph_UART4
+#define USER_A_UART                        USART3
+#define USER_A_UART_CLK                    RCC_APB1Periph_USART3
 #define USER_A_UART_TX_PIN                 GPIO_Pin_10
 #define USER_A_UART_TX_GPIO_PORT           GPIOC
 #define USER_A_UART_TX_GPIO_CLK            RCC_AHB1Periph_GPIOC
 #define USER_A_UART_TX_SOURCE              GPIO_PinSource10
-#define USER_A_UART_TX_AF                  GPIO_AF_UART4
+#define USER_A_UART_TX_AF                  GPIO_AF_USART3
 #define USER_A_UART_RX_PIN                 GPIO_Pin_11
 #define USER_A_UART_RX_GPIO_PORT           GPIOC
 #define USER_A_UART_RX_GPIO_CLK            RCC_AHB1Periph_GPIOC
 #define USER_A_UART_RX_SOURCE              GPIO_PinSource11
-#define USER_A_UART_RX_AF                  GPIO_AF_UART4
-#define USER_A_UART_IRQn                   UART4_IRQn
-#define USER_A_UART_IRQ                    UART4_IRQHandler
+#define USER_A_UART_RX_AF                  GPIO_AF_USART3
+#define USER_A_UART_IRQn                   USART3_IRQn
+#define USER_A_UART_IRQ                    USART3_IRQHandler
 
 #define USER_A_UART_DMA                    DMA1
 #define USER_A_UART_DMA_CLK                RCC_AHB1Periph_DMA1
 #define USER_A_UART_DMA_CHANNEL            DMA_Channel_4
-#define USER_A_UART_DMA_RX_STREAM          DMA1_Stream2
-#define USER_A_UART_DMA_TX_STREAM          DMA1_Stream4
-#define USER_A_UART_DMA_RX_STREAM_IRQ      DMA1_Stream2_IRQn
-#define USER_A_UART_DMA_TX_STREAM_IRQ      DMA1_Stream4_IRQn
-#define USER_A_UART_DMA_RX_IRQHandler      DMA1_Stream2_IRQHandler
-#define USER_A_UART_DMA_TX_IRQHandler      DMA1_Stream4_IRQHandler
+#define USER_A_UART_DMA_RX_STREAM          DMA1_Stream1
+#define USER_A_UART_DMA_TX_STREAM          DMA1_Stream3
+#define USER_A_UART_DMA_RX_STREAM_IRQ      DMA1_Stream1_IRQn
+#define USER_A_UART_DMA_TX_STREAM_IRQ      DMA1_Stream3_IRQn
+#define USER_A_UART_DMA_RX_IRQHandler      DMA1_Stream1_IRQHandler
+#define USER_A_UART_DMA_TX_IRQHandler      DMA1_Stream3_IRQHandler
 
-#define USER_A_UART_DMA_TX_FLAGS          (DMA_FLAG_FEIF4  | \
-                                           DMA_FLAG_DMEIF4 | \
-                                           DMA_FLAG_TEIF4  | \
-                                           DMA_FLAG_HTIF4  | \
-                                           DMA_FLAG_TCIF4 )
+#define USER_A_UART_DMA_TX_FLAGS          (DMA_FLAG_FEIF3  | \
+                                           DMA_FLAG_DMEIF3 | \
+                                           DMA_FLAG_TEIF3  | \
+                                           DMA_FLAG_HTIF3  | \
+                                           DMA_FLAG_TCIF3 )
 
-#define USER_A_UART_DMA_RX_FLAGS          (DMA_FLAG_FEIF2  | \
-                                           DMA_FLAG_DMEIF2 | \
-                                           DMA_FLAG_TEIF2  | \
-                                           DMA_FLAG_HTIF2  | \
-                                           DMA_FLAG_TCIF2    )
+#define USER_A_UART_DMA_RX_FLAGS          (DMA_FLAG_FEIF1  | \
+                                           DMA_FLAG_DMEIF1 | \
+                                           DMA_FLAG_TEIF1  | \
+                                           DMA_FLAG_HTIF1  | \
+                                           DMA_FLAG_TCIF1    )
+
+
 
 //**********************************************************************
 
@@ -298,16 +301,30 @@ limitations under the License.
 #define I2C1_DMA                        DMA1
 #define I2C1_DMA_CHANNEL                DMA_Channel_1
 #define I2C1_DMA_CLK                    RCC_AHB1Periph_DMA1
+
 #define I2C1_DMA_RX_STREAM              DMA1_Stream5
 #define I2C1_DMA_RX_STREAM_IRQ          DMA1_Stream5_IRQn
 #define I2C1_DMA_RX_STREAM_IRQHANDLER   DMA1_Stream5_IRQHandler
-
 #define I2C1_DMA_RX_FLAGS               (DMA_FLAG_FEIF5  | \
                                          DMA_FLAG_DMEIF5 | \
                                          DMA_FLAG_TEIF5  | \
                                          DMA_FLAG_HTIF5  | \
                                          DMA_FLAG_TCIF5)
 #define I2C1_DMA_RX_INT_DONE            DMA_IT_TCIF5
+
+#define I2C1_DMA_TX_STREAM              DMA1_Stream6
+#define I2C1_DMA_TX_STREAM_IRQ          DMA1_Stream6_IRQn
+#define I2C1_DMA_TX_STREAM_IRQHANDLER   DMA1_Stream6_IRQHandler
+#define I2C1_DMA_TX_FLAGS               (DMA_FLAG_FEIF6  | \
+                                         DMA_FLAG_DMEIF6 | \
+                                         DMA_FLAG_TEIF6  | \
+                                         DMA_FLAG_HTIF6  | \
+                                         DMA_FLAG_TCIF6)
+#define I2C1_DMA_TX_INT_DONE             DMA_IT_TCIF6
+
+
+
+
 
 /// Magnetometer data ready interrupt B5
 #define MAG_DATA_READY_GPIO_PIN              GPIO_Pin_5
@@ -318,6 +335,9 @@ limitations under the License.
 #define MAG_DATA_READY_EXTI_PIN_SOURCE       EXTI_PinSource5
 #define MAG_DATA_READY_EXTI_IRQn             EXTI9_5_IRQn
 
+/// I2C3 port is A8 (SCL)
+///              C9 (SDA), accelerometer
+#define kAccelerometerI2C               I2C3
 #define I2C3_SCL_PIN                    GPIO_Pin_8
 #define I2C3_SCL_GPIO_PORT              GPIOA
 #define I2C3_GPIO_SCL_CLK               RCC_AHB1Periph_GPIOA
@@ -330,11 +350,10 @@ limitations under the License.
 #define I2C3_DMA                        DMA1
 #define I2C3_DMA_CHANNEL                DMA_Channel_3
 #define I2C3_DMA_CLK                    RCC_AHB1Periph_DMA1
+
 #define I2C3_DMA_RX_STREAM              DMA1_Stream2
 #define I2C3_DMA_RX_STREAM_IRQ          DMA1_Stream2_IRQn
 #define I2C3_DMA_RX_STREAM_IRQHANDLER   DMA1_Stream2_IRQHandler
-
-
 #define I2C3_DMA_RX_FLAGS               (DMA_FLAG_FEIF2  | \
                                          DMA_FLAG_DMEIF2 | \
                                          DMA_FLAG_TEIF2  | \
@@ -342,44 +361,28 @@ limitations under the License.
                                          DMA_FLAG_TCIF2)
 #define I2C3_DMA_RX_INT_DONE            DMA_IT_TCIF2
 
+#define I2C3_DMA_TX_STREAM               DMA1_Stream4
+#define I2C3_DMA_TX_STREAM_IRQ           DMA1_Stream4_IRQn
+#define I2C3_DMA_TX_STREAM_IRQHANDLER    DMA1_Stream4_IRQHandler
+
+
+
+#define I2C3_DMA_TX_FLAGS               (DMA_FLAG_FEIF4  | \
+                                         DMA_FLAG_DMEIF4 | \
+                                         DMA_FLAG_TEIF4  | \
+                                         DMA_FLAG_HTIF4  | \
+                                         DMA_FLAG_TCIF4)
+#define I2C3_DMA_TX_INT_DONE             DMA_IT_TCIF4
+
+
+
 /// accelerometer can go to 2.25MHz but the STM32F2xx cannot,
 /// 600000 is possible but the asymetric-ness of the clock gets odd
 #define I2C3_SPEED                      400000
 #define I2C3_INTR_SUBPRIO               0x1      // fixme
 #define I2C3_INTR_PRIO                  0x5      // fixme
 
-#define I2C2_SCL_PIN                        GPIO_Pin_10
-#define I2C2_SCL_GPIO_PORT                  GPIOB
-#define I2C2_SCL_SOURCE                     GPIO_PinSource10
-#define I2C2_SDA_PIN                        GPIO_Pin_11
-#define I2C2_SDA_GPIO_PORT                  GPIOB
-#define I2C2_SDA_SOURCE                     GPIO_PinSource11
-#define I2C2_GPIO_CLK                       RCC_AHB1Periph_GPIOB
 
-#define I2C2_DMA                            DMA1
-#define I2C2_DMA_CHANNEL                    DMA_Channel_7
-#define I2C2_DMA_CLK                        RCC_AHB1Periph_DMA1
-#define I2C2_DMA_RX_STREAM                  DMA1_Stream3
-#define I2C2_DMA_RX_STREAM_IRQ              DMA1_Stream3_IRQn
-#define I2C2_DMA_RX_STREAM_IRQHANDLER       DMA1_Stream3_IRQHandler
-
-
-#define I2C2_DMA_RX_FLAGS                   (DMA_FLAG_FEIF3  | \
-                                             DMA_FLAG_DMEIF3 | \
-                                             DMA_FLAG_TEIF3  | \
-                                             DMA_FLAG_HTIF3  | \
-                                             DMA_FLAG_TCIF3)
-#define I2C2_DMA_RX_INT_DONE                DMA_IT_TCIF3
-
-/// accelerometer can go to 2.25MHz but the STM32F2xx cannot,
-/// 600000 is possible but the asymetric-ness of the clock gets odd
-#define I2C2_SPEED                          400000
-#define I2C2_INTR_SUBPRIO                   0x1      // fixme
-#define I2C2_INTR_PRIO                      0x5      // fixme
-
-/// I2C3 port is A8 (SCL)
-///              C9 (SDA), accelerometer
-#define kAccelerometerI2C               I2C3
 
  /// Accelerometer data ready interrupt C8
 #define ACCEL_DATA_READY_GPIO_PIN              GPIO_Pin_8

@@ -52,6 +52,7 @@ void    _InitExternalSync( FunctionalState NewState );
 // todo tm20160603 - PUT IN A BETTER PLACE!  TEMPORARY TO GET THIS COMPILING AND RUNNING!!!
 #include "TimingVars.h"
 TimingVars           timer;   // for InitTimingVars
+BOOL dacqInitialized = FALSE;
 
 
 typedef struct {
@@ -525,7 +526,9 @@ void TIM2_IRQHandler(void)
         osSemaphoreRelease(dataAcqSem);
 #if defined(CAN_BUS_COMM)
         // Upon TIM2 timeout, signal taskDataCANComminication() to continue
+        if(dacqInitialized){
         osSemaphoreRelease(canDataSem);
+        }
 #endif
 
     // reset the interrupt flag
@@ -607,7 +610,9 @@ void TIM5_IRQHandler(void)
                     osSemaphoreRelease(dataAcqSem);
 #if defined (CAN_BUS_COMM)
                         // Upon TIM2 timeout, signal taskDataCANComminication() to continue
+                    if(dacqInitialized){
                     osSemaphoreRelease(canDataSem);
+                    }
 #endif
                 }
                 break;
@@ -774,6 +779,8 @@ void DataAquisitionStart(void)
         InitCommunication_UserSPI();
 #endif
     }
+
+    dacqInitialized = TRUE;
 }
 
 

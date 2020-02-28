@@ -60,6 +60,7 @@ struct sPinConfig {
 };
 
 struct sUartConfig {
+    int               idx;
     USART_TypeDef     *uart;
     uint32_t          ahb1ClockEnable;
     uint32_t          apb1ClockEnable;
@@ -84,7 +85,8 @@ struct sUartConfig {
 // 0 - user com, 1 GPS
 const struct sUartConfig gUartConfig[NUM_UART_PORTS] = {
     {
-        .uart            = USER_A_UART,             // UART4
+        .idx             = 0,
+        .uart            = USER_A_UART,             // USART3
         .ahb1ClockEnable = USER_A_UART_TX_GPIO_CLK | USER_A_UART_TX_GPIO_CLK | USER_A_UART_DMA_CLK,
         .apb1ClockEnable = USER_A_UART_CLK,
         .ahb2ClockEnable = 0,
@@ -106,14 +108,15 @@ const struct sUartConfig gUartConfig[NUM_UART_PORTS] = {
         .subPriority     = 1,
         .dmaTxChannel  = USER_A_UART_DMA_CHANNEL,       // Channel 4
         .dmaRxChannel  = USER_A_UART_DMA_CHANNEL,       // Channel 4
-        .DMA_TX_Stream = USER_A_UART_DMA_TX_STREAM,     // DMA1_Stream4
-        .DMA_RX_Stream = USER_A_UART_DMA_RX_STREAM,     // DMA1_Stream2
-        .dmaTxIRQn     = USER_A_UART_DMA_TX_STREAM_IRQ, // DMA1_Stream4_IRQn 
-        .dmaRxIRQn     = USER_A_UART_DMA_RX_STREAM_IRQ, // DMA1_Stream2_IRQn
+        .DMA_TX_Stream = USER_A_UART_DMA_TX_STREAM,     // DMA1_Stream3
+        .DMA_RX_Stream = USER_A_UART_DMA_RX_STREAM,     // DMA1_Stream1
+        .dmaTxIRQn     = USER_A_UART_DMA_TX_STREAM_IRQ, // DMA1_Stream3_IRQn 
+        .dmaRxIRQn     = USER_A_UART_DMA_RX_STREAM_IRQ, // DMA1_Stream1_IRQn
         .Dma           = DMA1,
         .dmaTxFlags    = USER_A_UART_DMA_TX_FLAGS,
         .dmaRxFlags    = USER_A_UART_DMA_RX_FLAGS,
     }, {
+        .idx             = 1,
         .uart            = USER_B_UART,             // UART5
         .ahb1ClockEnable = USER_B_UART_TX_GPIO_CLK | USER_B_UART_TX_GPIO_CLK | USER_B_UART_DMA_CLK,
         .apb1ClockEnable = USER_B_UART_CLK,
@@ -144,6 +147,7 @@ const struct sUartConfig gUartConfig[NUM_UART_PORTS] = {
         .dmaTxFlags    = USER_B_UART_DMA_TX_FLAGS,
         .dmaRxFlags    = USER_B_UART_DMA_RX_FLAGS,
     } , {
+        .idx             = 2,
         .uart            = DEBUG_USART,                 // USART_1
         .ahb1ClockEnable = DEBUG_USART_TX_GPIO_CLK | DEBUG_USART_RX_GPIO_CLK | DEBUG_USART_DMA_CLK,
         .apb1ClockEnable = 0,
@@ -446,7 +450,11 @@ int uart_copyBytes(int channel , int index, int num, uint8_t *output)
 
 uint8_t uart_dma_transmit(const struct sUartConfig *config, uint8_t *data, uint16_t  length )
 {
+    if(config->idx == 0){
+        config->Dma->LIFCR = config->dmaTxFlags;
+    }else{
     config->Dma->HIFCR = config->dmaTxFlags;
+    }
 
     /// Configure the memory address: DMA_MemoryTargetConfig()
     config->DMA_TX_Stream->M0AR = (uint32_t)data;
@@ -469,7 +477,11 @@ void uart_prepare_tx(unsigned int channel, port_struct  *port)
     uint8_t  *data;
 
     const struct sUartConfig *uartConfig = &(gUartConfig[channel]);
-    uartConfig->Dma->HIFCR   = uartConfig->dmaTxFlags;                 //  (DEBUG_USART_DMA_TX_FLAGS);
+    if(channel == 0){
+        uartConfig->Dma->LIFCR   = uartConfig->dmaTxFlags;   
+    }else{
+        uartConfig->Dma->HIFCR   = uartConfig->dmaTxFlags;   
+    }
 
     COM_buf_delete_isr(&port->xmit_buf, 0); // will delete bytes for previous DMA transaction
 

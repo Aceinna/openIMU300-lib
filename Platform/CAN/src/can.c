@@ -387,11 +387,9 @@ void CAN1_RX0_IRQHandler(void)
   if (ItRslt == SET) {
     fifoPending = CAN_MessagePending(CAN1, 0);
     do {
-        if (gEcuInst.curr_rx_desc->rx_pkt_ready == DESC_OCCUPIED)
-             break;
         CAN_Receive(CAN1, 0, &(gEcuInst.curr_rx_desc->rx_buffer));
-        CAN_FIFORelease(CAN1, 0);
         gCANRxCompleteCallback();
+        CAN_FIFORelease(CAN1, 0);
         fifoPending--;
     } while (fifoPending > 0);
     
@@ -423,8 +421,6 @@ void CAN1_RX1_IRQHandler(void)
   if (ItRslt == SET) {
     fifoPending = CAN_MessagePending(CAN1, 1);
     do {
-        if (gEcuInst.curr_rx_desc->rx_pkt_ready == DESC_OCCUPIED)
-             break;
         CAN_Receive(CAN1, 1, &(gEcuInst.curr_rx_desc->rx_buffer));
         CAN_FIFORelease(CAN1, 1);
         gCANRxCompleteCallback();
@@ -485,8 +481,6 @@ void CAN2_RX0_IRQHandler(void)
   if (ItRslt == SET) {
     fifoPending = CAN_MessagePending(CAN2, 0);
     do {
-        if (gEcuInst.curr_rx_desc->rx_pkt_ready == DESC_OCCUPIED)
-             break;
         CAN_Receive(CAN2, 0, &(gEcuInst.curr_rx_desc->rx_buffer));
         CAN_FIFORelease(CAN2, 0);
         gCANRxCompleteCallback();
@@ -522,8 +516,6 @@ void CAN2_RX1_IRQHandler(void)
   if (ItRslt == SET) {
     fifoPending = CAN_MessagePending(CAN2, 1);
     do {
-        if (gEcuInst.curr_rx_desc->rx_pkt_ready == DESC_OCCUPIED)
-             break;
         CAN_Receive(CAN2, 1, &(gEcuInst.curr_rx_desc->rx_buffer));
         CAN_FIFORelease(CAN2, 1);
         gCANRxCompleteCallback();

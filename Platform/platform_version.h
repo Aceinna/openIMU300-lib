@@ -37,19 +37,19 @@ limitations under the License.
 #define VERSION_STAGE 0
 #define VERSION_BUILD 0
 
-#define VERSION_MAJOR_NUM 0
-#define VERSION_MINOR_NUM 0
-#define VERSION_PATCH_NUM 0
+#define VERSION_MAJOR_NUM 1
+#define VERSION_MINOR_NUM 1
+#define VERSION_PATCH_NUM 4
 #define VERSION_STAGE_NUM 0
-#define VERSION_BUILD_NUM 1
+#define VERSION_BUILD_NUM 0
 
 //
 //                                    1         2
 //                           12345678901234567890
 #ifndef  CAN_BUS_COMM
-#define  SOFTWARE_PART      "5020-3885-02 1.1.2"
+#define  SOFTWARE_PART      "5020-3885-02 1.1.4"
 #else
-#define  SOFTWARE_PART      "5020-3309-01 1.1.2"
+#define  SOFTWARE_PART      "5020-3309-01 1.1.4"
 #endif
 
 #define  SOFTWARE_PART_LEN  30

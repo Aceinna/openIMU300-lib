@@ -737,6 +737,7 @@ void aceinna_j1939_transmit_isr(void)
     ecu_transmit();
 }
 
+extern BOOL canStarted;
 /** ***************************************************************************
  * @name  aceinna_j1939_receive_isr() an API of receiving handler
  * @brief manage receiving queue
@@ -748,16 +749,22 @@ void aceinna_j1939_receive_isr(void)
 {
   struct sae_j1939_rx_desc *desc;
   
+  if(!canStarted){
+      return;
+  }
+  
   desc = gEcu->curr_rx_desc;
   
   // check current rx desc
-  if ((desc == NULL) || (desc->next == NULL) || (desc->rx_pkt_ready == DESC_OCCUPIED))
+  if ((desc == NULL) || (desc->next == NULL) || (desc->rx_pkt_ready == DESC_OCCUPIED)){
     return;
+  }
   
   desc->rx_pkt_ready = DESC_OCCUPIED;
   
-  if (desc->next->rx_pkt_ready == DESC_IDLE)
+  if (desc->next->rx_pkt_ready == DESC_IDLE){
     gEcu->curr_rx_desc = gEcu->curr_rx_desc->next;
+  }
   
   return;
 }

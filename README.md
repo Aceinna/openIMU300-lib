@@ -1,2 +1,2 @@
-# openIMU-300 Core Library
-OpenIMU300 Core Library v1.0.8
+# openIMU-300 Platform Library
+OpenIMU300 Platform Library v1.0.10

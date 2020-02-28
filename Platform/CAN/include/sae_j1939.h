@@ -499,7 +499,7 @@ typedef struct{
     uint16_t hAcc;                      // /1000 m, if > 65535 -> 65535 , horizontal accuracy estimate
     uint16_t vAcc;                      // /1000 m, if > 65535 -> 65535 , vertical accuracy estimate
     uint16_t pDOP;                      // ++ scaling is 0.01, position DOP
-    int16_t  headMot;                   // *182/100000 deg, 
+    uint16_t headMot;                   // *182/100000 deg, 
 }CUSTOM_GNSS_DOP_DATA;
 
 // GNSS Custom message 2
@@ -756,8 +756,8 @@ extern BOOL      UseAlgorithm();
 // priority 6
 // PF 251
 // PS 0xA0 - 0xBF and 0xE0 - 0xFF
-#define VEHICLE_DATA1_ID_BASE          0x18FBF000
-#define VEHICLE_DATA1_FILTER_BASE_MASK 0x18FBF000
+#define VEHICLE_DATA2_ID_BASE          0x18FF6E00
+#define VEHICLE_DATA2_FILTER_BASE_MASK 0x18FF6E00
 
 
 // priority 6
