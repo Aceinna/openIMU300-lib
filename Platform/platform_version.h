@@ -47,9 +47,9 @@ limitations under the License.
 //                                    1         2
 //                           12345678901234567890
 #ifndef  CAN_BUS_COMM
-#define  SOFTWARE_PART      "5020-3885-02 1.1.4"
+#define  SOFTWARE_PART      "5020-3885-02 1.1.5"
 #else
-#define  SOFTWARE_PART      "5020-3309-01 1.1.4"
+#define  SOFTWARE_PART      "5020-3309-01 1.1.5"
 #endif
 
 #define  SOFTWARE_PART_LEN  30
