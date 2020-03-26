@@ -394,6 +394,14 @@ typedef struct {
     uint64_t measure_latency      :       8;        // latency
 } SLOPE_SENSOR_2;
 
+// vehicle direction speed PGN 65256 (254 232)
+typedef struct {
+    uint64_t bearing              :       16;       // yaw        offset 0, 1/128 deg/bit  0 to 501.9 deg
+    uint64_t speed                :       16;       // speed      offset 0, 1/256 km/h per bit  0 to 250.995 km/h
+    uint64_t pitch                :       16;       // pitch      offset -200 deg, 1/128 deg/bit -200 to 301.99 deg 
+    uint64_t altitude             :       16;       // altitude - default 0 -2500m, 0.125m/bit -2500 to 5531.875 m
+} VEHICLE_DIR_SPEED;
+
 // angular rate data payload format
 typedef struct {
     uint16_t pitch_rate;                            // pitch rate
@@ -731,6 +739,7 @@ extern uint8_t aceinna_j1939_send_course_rapid_update(COURSE_RAPID_UPDATE_DATA *
 extern uint8_t aceinna_j1939_send_attitude(ATTITUDE_DATA * data);
 extern uint8_t aceinna_j1939_send_position_rapid_update(GPS_DATA * data);
 extern uint8_t aceinna_j1939_build_msg(void *payload, msg_params_t *params);
+extern uint8_t aceinna_j1939_send_veh_dir_speed(VEHICLE_DIR_SPEED *data);
 
 
 extern void      SaveEcuAddress(uint16_t address);

@@ -516,7 +516,7 @@ uint8_t find_tx_desc(struct sae_j1939_tx_desc **input)
   {
     *input =  (*input)->next;
     if (*input == gEcuInst.curr_tx_desc) {
-      gEcuInst.state = _ECU_TX_OVERFLOW;
+//      gEcuInst.state = _ECU_TX_OVERFLOW;
       return 0;
     }
   }

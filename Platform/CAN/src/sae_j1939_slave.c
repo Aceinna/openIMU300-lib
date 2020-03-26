@@ -347,6 +347,23 @@ uint8_t aceinna_j1939_send_angular_rate(AUGULAR_RATE * data)
 	return aceinna_j1939_build_msg((void *)data, &params);
 }
 
+uint8_t aceinna_j1939_send_veh_dir_speed(VEHICLE_DIR_SPEED *data)
+{
+  	msg_params_t params;
+
+  	// header of angular rate packet
+    params.data_page = 0;
+  	params.ext_page = 0;
+  	params.pkt_type = SAE_J1939_DATA_PACKET;
+  	params.priority = SAE_J1939_POSITION_PRIORITY;
+  	params.PF       = SAE_J1939_PDU_FORMAT_254;
+  	params.len      = ACEINNA_SAE_J1939_ECU_PACKET_LEN;
+  	params.PS       = SAE_J1939_PDU_SPECIFIC_232;
+	
+	return aceinna_j1939_build_msg((void *)data, &params);
+
+}
+
 
 /** ***************************************************************************
  * @name  aceinna_j1939_send_acceleration() acceleration data packet 61485 (0xF02D)
