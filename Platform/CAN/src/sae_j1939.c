@@ -345,6 +345,9 @@ void send_address_claim(ECU_INSTANCE *ecu)
       
       memcpy((void *)addr_claim_desc->tx_buffer.Data, (void *)(&(ecu->name->words)), SAE_J1939_PAYLOAD_MAX_LEN);
   }
+
+  addr_claim_desc->tx_identifier.control_bits.data_page = 0;
+  addr_claim_desc->tx_identifier.control_bits.ext_page  = 0;
   
   addr_claim_desc->tx_buffer.ExtId = ((addr_claim_desc->tx_identifier.r << 24) |
                                       (addr_claim_desc->tx_identifier.pdu_format << 16) |
