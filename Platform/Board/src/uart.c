@@ -185,7 +185,7 @@ void uart_registerRxSemaphore(int portType, osSemaphoreId id)
 {
     int channel;
     if(id){
-        channel = platformGetSerialChannel(portType);
+        channel = platformGetSerialChannel(portType, FALSE);
         uartRxSemIds[channel] = id;
     }
 }
@@ -683,7 +683,7 @@ unsigned int bytes_remaining(unsigned int channel,
  ******************************************************************************/
 void uart_BIT (int uartType)
 {
-    int uartChan = platformGetSerialChannel(uartType);
+    int uartChan = platformGetSerialChannel(uartType, FALSE);
     USART_TypeDef *uart;
     
     if(uartChan < 0 || uartChan > 2){

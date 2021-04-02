@@ -46,7 +46,6 @@ limitations under the License.
 #include "commAPI.h"
 
 
-
 void    _InitExternalSync( FunctionalState NewState );
 
 // todo tm20160603 - PUT IN A BETTER PLACE!  TEMPORARY TO GET THIS COMPILING AND RUNNING!!!
@@ -771,7 +770,7 @@ void DataAquisitionStart(void)
 
     /// Select UART or SPI (if DR pin is pulled LOW then select UART, else SPI).
     if(platformGetUnitCommunicationType() != SPI_COMM ) {
-        uart_init(userSerialChan, platformGetBaudRate());
+        uart_init(userSerialChan, platformGetBaudRate(0xFFFF));
     } 
     else { /// SPI
 #ifdef SPI_BUS_COMM

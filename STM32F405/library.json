@@ -1,6 +1,6 @@
 {
 	"name": "STM32F405",
- 	"version": "1.0.4",
+ 	"version": "1.0.5",
  	"description": "STM32F405 MCU Low Level Library",
  	"build": {
  		"flags": [

@@ -1,6 +1,6 @@
 {
 	"name": "Sensors",
- 	"version": "1.0.10",
+ 	"version": "1.0.11",
  	"description": "OpenIMU300 sensors and storage library",
  	"build": {
  		"flags": [

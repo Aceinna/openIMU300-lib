@@ -151,6 +151,11 @@
 #define PLL_N      232
 uint32_t SystemCoreClock = 119895667;
 
+//#define PLL_M      18
+//#define PLL_N      243
+//uint32_t SystemCoreClock = 167440500;
+
+
 //#define PLL_M      12            // #2
 //#define PLL_N      140
 //uint32_t SystemCoreClock = 144701666;

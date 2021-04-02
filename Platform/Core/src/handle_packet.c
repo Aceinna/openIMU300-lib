@@ -376,7 +376,7 @@ static void _UcbWriteFields (ExternPortTypeEnum port,
 
     /// verify that the packet length matches packet specification
     if( ( numFields > 0 ) &&
-        ( ptrUcbPacket->payloadLength == (1 + numFields * 4) ) && !eepromLocked())
+        ( ptrUcbPacket->payloadLength == (1 + numFields * 4) ) )
     {
         /// loop through all fields and data specified in set fields request
         for (fieldCount = 0; fieldCount < numFields; ++fieldCount) {
@@ -392,10 +392,10 @@ static void _UcbWriteFields (ExternPortTypeEnum port,
                                                fieldId,
                                                fieldData,
                                                fieldId);
-// there is no check for corect number of changed fields only that something has changed
+        // there is no check for corect number of changed fields only that something has changed
         if (validFieldCount > 0) { ///< all or some requested field changes valid?
             /// apply any changes
-            if (WriteFieldData() == TRUE) { // xbowsp_fields.c
+            if (WriteFieldData() == TRUE && !eepromLocked()) { // xbowsp_fields.c
                 /// build and send positive acknowledgement packet
                 ptrUcbPacket->payloadLength = (uint8_t)(1 + (validFieldCount * 2));
 

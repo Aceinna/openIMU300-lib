@@ -45,11 +45,79 @@ static ConfigurationStruct proposedEepromConfiguration;
 
 static BOOL portConfigurationChanged = FALSE; // port settings are to be changed
 extern BOOL memsicMag;
+BOOL fWriteRequest = FALSE;
+
+static uint16_t newOrientation = 0xFFFF;
+static uint16_t newAccelFiltr  = 0xFFFF;
+static uint16_t newRateFiltr   = 0xFFFF;
+static uint16_t newEcuAddress  = 0xFFFF;
+static uint16_t newEcuBaudrate = 0xFFFF;
+static uint16_t newEcuUartBaudrate = 0xFFFF;
+static uint16_t newEcuUartPacketType = 0xFFFF;
+static uint16_t newEcuUartPacketRate = 0xFFFF;
+static uint16_t tempEcuUartBaudrate = 0xFFFF;
+static uint16_t tempEcuUartPacketType = 0xFFFF;
+static uint16_t tempEcuUartPacketRate = 0xFFFF;
+
 
 /// for scaled sensor packet
 #define MAX_TEMP_4_SENSOR_PACKET   99.9
 #define MAX_OUTPUT_TEMP_q27  1335466394   // iq27( 1335466394 ) =  9.5 [ 10 degC ] =  99.5 [ degC ]
 #define MIN_OUTPUT_TEMP_q27  -671088640   // iq27( -671088640 ) = -5.0 [ 10 degC ] = -50.0 [ degC ]
+
+uint16_t GetNewOrientation()
+{
+    return newOrientation;
+}
+
+uint16_t GetNewAccelFiltr()
+{
+    return newAccelFiltr;
+}
+
+uint16_t GetNewRateFiltr()
+{
+    return newRateFiltr;
+}
+
+uint16_t GetNewEcuAddress()
+{
+    return newEcuAddress;
+}
+
+uint16_t GetNewEcuBaudrate()
+{
+    return newEcuBaudrate;
+}
+
+uint16_t GetNewEcuUartBaudrate()
+{
+    return newEcuUartBaudrate;
+}
+
+uint16_t GetNewEcuPacketType()
+{
+    return newEcuUartPacketType;
+}
+
+uint16_t GetNewEcuUartPacketRate()
+{
+    return newEcuUartPacketRate;
+}
+
+
+
+void    ResetChanges()
+{
+    newOrientation = 0xFFFF;
+    newAccelFiltr  = 0xFFFF;
+    newRateFiltr   = 0xFFFF;
+    newEcuAddress  = 0xFFFF;
+    newEcuBaudrate = 0xFFFF;
+    newEcuUartBaudrate   = 0xFFFF;
+    newEcuUartPacketType = 0xFFFF;
+    newEcuUartPacketRate = 0xFFFF;
+}
 
 
 /** ****************************************************************************
@@ -163,12 +231,17 @@ static uint8_t CheckFieldData (ConfigurationStruct *currentConfiguration,
     BOOL                packetCodeChanged        = FALSE;
     BOOL                packetRateDividerChanged = FALSE;
     BOOL                userBaudChanged          = FALSE;
+    BOOL                uartCongifValid          = FALSE;
     /// index for stepping through proposed configuration fields
     uint8_t             fieldIndex      = 0;
     uint8_t             validFieldIndex = 0; ///< index for building valid return array
     uint8_t             type [UCB_PACKET_TYPE_LENGTH]; ///< working packet type byte buffer
     UcbPacketType       continuousPacketType;
     ConfigurationStruct proposedPortConfig;
+
+    tempEcuUartBaudrate   = 0xFFFF;
+    tempEcuUartPacketType = 0xFFFF;
+    tempEcuUartPacketRate = 0xFFFF;
 
     /// copy current configuration - for testing validity of port configuration only
     proposedPortConfig = *currentConfiguration;
@@ -191,15 +264,24 @@ static uint8_t CheckFieldData (ConfigurationStruct *currentConfiguration,
                     if (UcbPacketIsAnOutputPacket(continuousPacketType) == TRUE) {
                         packetCodeChanged             = TRUE;
                         proposedPortConfig.packetCode = fieldData[fieldIndex];
+                        if(fWriteRequest){
+                            tempEcuUartPacketType = fieldData[fieldIndex];
+                        }
                     }
                     break;
                 case PACKET_RATE_DIVIDER_FIELD_ID:
                     packetRateDividerChanged             = TRUE;
                     proposedPortConfig.packetRateDivider = fieldData[fieldIndex];
+                    if(fWriteRequest){
+                        tempEcuUartPacketRate = fieldData[fieldIndex];
+                    }
                     break;
-                case PORT_1_BAUD_RATE_FIELD_ID:
+                case BAUD_RATE_USER_ID:
                     userBaudChanged = TRUE;
                     proposedPortConfig.baudRateUser = fieldData[fieldIndex];
+                    if(fWriteRequest){
+                        tempEcuUartBaudrate = fieldData[fieldIndex];
+                    }
                     break;
                 case ORIENTATION_FIELD_ID:
                     if (CheckOrientation(fieldData[fieldIndex]) == TRUE) {
@@ -208,7 +290,38 @@ static uint8_t CheckFieldData (ConfigurationStruct *currentConfiguration,
                         /// add to valid list
                         validFields[validFieldIndex++]        = fieldId[fieldIndex];
                         // Set the flags to RESTART the algorithm
-                        InitializeAlgorithmStruct(getAlgorithmFrequency());
+                        InitializeAlgorithmStruct(getAlgorithmFrequency(),CurrentIMU);
+                        if(fWriteRequest){
+                            newOrientation = fieldData[fieldIndex];
+                        }
+                    }
+                    break;
+                case ACCEL_FILTR_FIELD_ID:
+                    ((uint16_t *)currentConfiguration)[(fieldId[fieldIndex])] = fieldData[fieldIndex];
+                    validFields[validFieldIndex++] = fieldId[fieldIndex];
+                    if(fWriteRequest){
+                        newAccelFiltr = fieldData[fieldIndex];
+                    }
+                    break;
+                case RATE_FILTR_FIELD_ID:
+                    ((uint16_t *)currentConfiguration)[(fieldId[fieldIndex])] = fieldData[fieldIndex];
+                    validFields[validFieldIndex++] = fieldId[fieldIndex];
+                    if(fWriteRequest){
+                        newRateFiltr = fieldData[fieldIndex];
+                    }
+                    break;
+                case ECU_ADDRESS_FIELD_ID:
+                    ((uint16_t *)currentConfiguration)[(fieldId[fieldIndex])] = fieldData[fieldIndex];
+                    validFields[validFieldIndex++] = fieldId[fieldIndex];
+                    if(fWriteRequest){
+                        newEcuAddress = fieldData[fieldIndex];
+                    }
+                    break;
+                case ECU_BAUD_RATE_FIELD_ID:
+                    ((uint16_t *)currentConfiguration)[(fieldId[fieldIndex])] = fieldData[fieldIndex];
+                    validFields[validFieldIndex++] = fieldId[fieldIndex];
+                    if(fWriteRequest){
+                        newEcuBaudrate = fieldData[fieldIndex];
                     }
                     break;
                 case OFFSET_ROLL_ALIGN_FIELD_ID:
@@ -227,12 +340,11 @@ static uint8_t CheckFieldData (ConfigurationStruct *currentConfiguration,
             }
         }
     }
-
     /// check proposed port configuration field settings (order/priority matters!)
     if (userBaudChanged == TRUE) {
         if (ValidPortConfiguration(&proposedPortConfig) == TRUE) {
             portConfigurationChanged = TRUE;
-
+            uartCongifValid          = TRUE;
             /// add configuration changes to proposed configuration and add all
             /// relevant fields to valid list
             if (packetCodeChanged == TRUE) {
@@ -257,6 +369,7 @@ static uint8_t CheckFieldData (ConfigurationStruct *currentConfiguration,
         proposedPortConfig.baudRateUser = currentConfiguration->baudRateUser;
 
         if (ValidPortConfiguration(&proposedPortConfig) == TRUE) {
+            uartCongifValid       = TRUE;
             if (packetCodeChanged == TRUE) {
                 currentConfiguration->packetCode = proposedPortConfig.packetCode;
                 validFields[validFieldIndex++]   = PACKET_TYPE_FIELD_ID;
@@ -268,6 +381,21 @@ static uint8_t CheckFieldData (ConfigurationStruct *currentConfiguration,
             }
         }
     }
+
+    if(fWriteRequest && uartCongifValid){
+        if(tempEcuUartBaudrate != 0xFFFF){
+            newEcuUartBaudrate = tempEcuUartBaudrate;
+        }
+        if(tempEcuUartPacketType != 0xFFFF){
+            newEcuUartPacketType = tempEcuUartPacketType;
+        }
+        if(tempEcuUartPacketRate != 0xFFFF){
+            newEcuUartPacketRate = tempEcuUartPacketRate;
+        }
+    }
+
+    fWriteRequest         = FALSE;
+
     return validFieldIndex;
 } /* end CheckFieldData */
 
@@ -313,7 +441,7 @@ uint8_t CheckEepromFieldData (uint8_t  numFields,
                               uint16_t validFields [])
 {   /// copy current EEPROM configuration
     readUnitConfigurationStruct(&proposedEepromConfiguration);
-
+    fWriteRequest = TRUE;
     return CheckFieldData(&proposedEepromConfiguration,
                           numFields,
                           fieldId,
@@ -495,7 +623,7 @@ uint16_t appendMagReadings( uint8_t  *response,
                            tmp);
     }else{
         for(int i = 0; i < 3; i++){
-            tmp   = gSensorsData.scaledSensors[XMAG + i] * 32768;
+            tmp   = gSensorsData.scaledSensors[XMAG + i] * 3276.8;
             index = uint16ToBuffer(response, index, tmp);
         }
     }

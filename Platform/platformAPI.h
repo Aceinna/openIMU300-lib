@@ -42,8 +42,8 @@ int  platformConvertPacketRateDivider(int configParam);
 int  platformGetPacketRateDivider();
 void platformSetPacketRateDivider(int div);
 int  platformGetOrientation(void);
-int  platformGetPacketRate(void);
-int  platformGetBaudRate(void);
+int  platformGetPacketRate(uint16_t divider);
+int  platformGetBaudRate(uint16_t baudCode);
 int  platformGetAccelLfpFreq();
 int  platformGetRateLfpFreq();
 BOOL appStartedFirstTime(void);
@@ -84,7 +84,7 @@ void platformUnassignSerialChannels();
 void platformForceUnassignSerialChannels();
 BOOL platformAssignPortTypeToSerialChannel(int portType, int channel);
 BOOL platformForcePortTypeToSerialChannel(int portType, int channel);
-int  platformGetSerialChannel(int portType);
+int  platformGetSerialChannel(int portType, BOOL fTx);
 void platformRegisterRxSerialSemaphoreID(int portType, void *semId);
 void platformGetVersionBytes(uint8_t *bytes);
 void platformSetCanPacketRate(int rate);
@@ -107,6 +107,7 @@ void       platformUpdateAccelFilterType(uint8_t type);
 int        platformGetPreFilterType();
 int        platformGetFilterCounts(uint32_t type);
 int        platformGetFilterType(int sensor, BOOL fSpi);
+int        platformGetFilterFrequency(int sensor, BOOL fSpi);
 uint32_t   platformGetIMUCounter();
 void       platformUpdateITOW(uint32_t itow);
 uint64_t   platformGetEstimatedITOW();
@@ -115,6 +116,15 @@ uint64_t   platformGetSolutionTstamp();
 double     platformGetSolutionTstampAsDouble();
 uint32_t   platformGetItow(BOOL *detected, BOOL *updated);
 uint32_t   platformGetGpsItow();
+uint16_t   platformGetOrientationWord();
+uint16_t   platformGetNewOrientation();
+uint16_t   platformGetNewAccelFiltr();
+uint16_t   platformGetNewRateFiltr();
+void       platformResetChanges();
+uint16_t   platformGetFilterFrequencyFromCounts(uint16_t counts);
+void       platformSetEcuBaudrate(uint16_t rate); 
+void       platformSetEcuAddress(uint16_t address);
+BOOL      platformDetectPingMessageFromGpsDriver(uint8_t byte);
 
 
 
@@ -147,10 +157,21 @@ extern void    SetSensorError(int sensor);
 #define UART_CHANNEL_NONE -1  // undefined channel
 
 extern int userSerialChan;
-extern int gpsSerialChan;
+extern int gpsChan;
 extern int debugSerialChan;
 
 #define LEGACY_BOOT_SEQUENCE 0x0055554A4200A0CELL
 #define LEGACY_PING_SEQUENCE 0x005555504B009EF4LL
+
+uint16_t GetNewOrientation();
+uint16_t GetNewAccelFiltr();
+uint16_t GetNewRateFiltr();
+uint16_t GetNewEcuAddress();
+uint16_t GetNewEcuBaudrate();
+void     ResetChanges();
+uint16_t GetNewEcuUartBaudrate();
+uint16_t GetNewEcuPacketType();
+uint16_t GetNewEcuUartPacketRate();
+
 
 #endif

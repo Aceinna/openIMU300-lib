@@ -45,6 +45,8 @@ extern BOOL     eraseUserConfigInEeprom(void);
 #define PACKET_RATE_DIVIDER_FIELD_ID  		0x0001	///< continuous packet rate divider
 #define BAUD_RATE_USER_ID             		0x0002	///< continuous packet rate divider
 #define PACKET_TYPE_FIELD_ID  				0x0003	///< continuous packet type
+#define ACCEL_FILTR_FIELD_ID  				0x0005	///< user defined accel filter
+#define RATE_FILTR_FIELD_ID  	  			0x0006	///< user defined rate filter
 #define ORIENTATION_FIELD_ID  				0x0007	///< user defined axis orientation
 #define USER_BEHAVIOR_FIELD_ID				0x0008	///< user behaviour switches
 #define TURN_SWITCH_THRESHOLD_FIELD_ID		0x000D	///< turn switch threshold

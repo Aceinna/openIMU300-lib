@@ -45,6 +45,7 @@ limitations under the License.
 #define BWF_LOWPASS_4TH_25       12
 #define BWF_LOWPASS_4TH_50       13
 #define BWF_LOWPASS_4TH_100      14
+#define BWF_LOWPASS_AVERAGE      15
 
 
 #define BWF_LOWPASS_DATA_RATE_400       0

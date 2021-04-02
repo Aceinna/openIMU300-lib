@@ -44,16 +44,16 @@ typedef enum {
 // J1939 64-bit name structure
 typedef union {
   struct {
-    uint64_t arbitrary_address       : 1;     // arbit bits
-    uint64_t industry_group          : 3;     // group bits
-    uint64_t vehicle_system_instance : 4;     // system instance bits
-    uint64_t vehicle_system          : 7;     // system bits
-    uint64_t reserved                : 1;
-    uint64_t function                : 8;     // function bits
-    uint64_t function_instance       : 5;     // function instance bits
-    uint64_t ecu                     : 3;     // ecu bits
-    uint64_t manufacture_code        : 11;    // manufacture code from SAE, 823 belongs to Aceinna
     uint64_t identity_number         : 21;    // id bits
+    uint64_t manufacture_code        : 11;    // manufacture code from SAE, 823 belongs to Aceinna
+    uint64_t ecu                     : 3;     // ecu bits
+    uint64_t function_instance       : 5;     // function instance bits
+    uint64_t function                : 8;     // function bits
+    uint64_t reserved                : 1;
+    uint64_t vehicle_system          : 7;     // system bits
+    uint64_t vehicle_system_instance : 4;     // system instance bits
+    uint64_t industry_group          : 3;     // group bits
+    uint64_t arbitrary_address       : 1;     // arbit bits
   } bits;
   
   uint64_t words;
@@ -106,34 +106,34 @@ typedef struct {
 
 
 // J1939 PS definition
-#define SAE_J1939_GROUP_EXTENSION_ECU                197
-#define SAE_J1939_GROUP_EXTENSION_SOFTWARE_VERSION   218
-#define SAE_J1939_GROUP_EXTENSION_ALGORITHM_RESET    80
-#define SAE_J1939_GROUP_EXTENSION_SAVE_CONFIGURATION 81
-#define SAE_J1939_GROUP_EXTENSION_TEST_HARDWARE      82
-#define SAE_J1939_GROUP_EXTENSION_TEST_SOFTWARE      83
-#define SAE_J1939_GROUP_EXTENSION_TEST_STATUS        84
-#define SAE_J1939_GROUP_EXTENSION_PACKET_RATE        85
-#define SAE_J1939_GROUP_EXTENSION_PACKET_TYPE        86
-#define SAE_J1939_GROUP_EXTENSION_DIGITAL_FILTER     87
-#define SAE_J1939_GROUP_EXTENSION_ORIENTATION        88
-#define SAE_J1939_GROUP_EXTENSION_USER_BEHAVIOR      89
-#define SAE_J1939_GROUP_EXTENSION_BUILT_IN_TEST      90
-#define SAE_J1939_GROUP_EXTENSION_ANGLE_ALARM        91
-#define SAE_J1939_GROUP_EXTENSION_CONE_ALARM         92
-#define SAE_J1939_GROUP_EXTENSION_ACCELERATION_PARAM 93
-#define SAE_J1939_GROUP_EXTENSION_MAG_ALIGN_CMD      94
-#define SAE_J1939_GROUP_EXTENSION_BANK0              240
-#define SAE_J1939_GROUP_EXTENSION_BANK1              241
-#define SAE_J1939_GROUP_EXTENSION_ADDR               254
-#define SAE_J1939_GROUP_EXTENSION_ACK                255
-#define SAE_J1939_GROUP_EXTENSION_VP                 243
+#define SAE_J1939_GROUP_EXTENSION_ECU                197    // 0xC5  
+#define SAE_J1939_GROUP_EXTENSION_SOFTWARE_VERSION   218    // 0xDA
+#define SAE_J1939_GROUP_EXTENSION_ALGORITHM_RESET    80     // 0x50 BANK0 1
+#define SAE_J1939_GROUP_EXTENSION_SAVE_CONFIGURATION 81     // 0x51 BANK0 2
+#define SAE_J1939_GROUP_EXTENSION_TEST_HARDWARE      82     // 0x52
+#define SAE_J1939_GROUP_EXTENSION_TEST_SOFTWARE      83     // 0x53
+#define SAE_J1939_GROUP_EXTENSION_TEST_STATUS        84     // 0x54 BANK0 3
+#define SAE_J1939_GROUP_EXTENSION_PACKET_RATE        85     // 0x55 BANK1 1
+#define SAE_J1939_GROUP_EXTENSION_PACKET_TYPE        86     // 0x56 BANK1 2
+#define SAE_J1939_GROUP_EXTENSION_DIGITAL_FILTER     87     // 0x57 BANK1 3
+#define SAE_J1939_GROUP_EXTENSION_ORIENTATION        88     // 0x58 BANK1 4
+#define SAE_J1939_GROUP_EXTENSION_USER_BEHAVIOR      89     // 0x59 BANK1 5
+//#define SAE_J1939_GROUP_EXTENSION_BUILT_IN_TEST      90     // 0x5A
+//#define SAE_J1939_GROUP_EXTENSION_ANGLE_ALARM        91     // 0x5B
+//#define SAE_J1939_GROUP_EXTENSION_CONE_ALARM         92     // 0x5C
+#define SAE_J1939_GROUP_EXTENSION_ACCELERATION_PARAM 93     // 0x5D
+#define SAE_J1939_GROUP_EXTENSION_MAG_ALIGN_CMD      94     // 0x5E BANK0 4
+#define SAE_J1939_GROUP_EXTENSION_BANK0              240    // 0xF0    
+#define SAE_J1939_GROUP_EXTENSION_BANK1              241    // 0xF1
+#define SAE_J1939_GROUP_EXTENSION_ADDR               254    // 0xFE
+#define SAE_J1939_GROUP_EXTENSION_ACK                255    // 0xFF
+#define SAE_J1939_GROUP_EXTENSION_VP                 243    // 0xF3
 
 
-#define SAE_J1939_GROUP_EXTENSION_SLOPE_SENSOR       41      
-#define SAE_J1939_GROUP_EXTENSION_ANGULAR_RATE       42
-#define SAE_J1939_GROUP_EXTENSION_ACCELERATION       45
-#define SAE_J1939_GROUP_EXTENSION_MAG                106
+#define SAE_J1939_GROUP_EXTENSION_SLOPE_SENSOR       41     // 0x29
+#define SAE_J1939_GROUP_EXTENSION_ANGULAR_RATE       42     // 0x2A 
+#define SAE_J1939_GROUP_EXTENSION_ACCELERATION       45     // 0x2D
+#define SAE_J1939_GROUP_EXTENSION_MAG                106    // 0x6A
 
 // J1939 message priority
 #define SAE_J1939_CONTROL_PRIORITY                   6
@@ -181,7 +181,7 @@ typedef enum {
 #define SAE_J1939_PAYLOAD_LEN_8_BYTES                  8
 #define SAE_J1939_PAYLOAD_LEN_2_BYTES                  2
 
-#define ACEINNA_SAE_J1939_VERSION_PACKET_LEN            6
+#define ACEINNA_SAE_J1939_VERSION_PACKET_LEN            5
 #define ACEINNA_SAE_J1939_ECU_PACKET_LEN                8
 
 #define ACEINNA_SAE_J1939_ALGO_RST_LEN                  3
@@ -567,6 +567,7 @@ typedef struct {
   uint8_t  accel_cut_off;                   // Xl's lpf
   uint8_t  rate_cut_off;                    // rate's lpf
   uint16_t  orien_bits;                     // orientation
+  uint16_t  user_behavior;                  // behavior
   uint8_t  restart_on_overrange;            // restart on over range
   uint8_t  dynamic_motion;                  // dynamic motion
   uint8_t roll_upper;                       // upper limit of roll
@@ -658,6 +659,11 @@ enum {
   _ECU_ADDR_OCCUPIED                        =      1     // occupied address value
 };
 
+enum{
+    ACEINNA_J1939_MIN_CMD_PS = 0x40,    // 64
+    ACEINNA_J1939_MAX_CMD_PS = 0x6A,    // 106
+};
+
 // ECU address structure
 typedef struct {
   uint8_t      status;                 // status, available or occupied
@@ -740,6 +746,7 @@ extern uint8_t aceinna_j1939_send_attitude(ATTITUDE_DATA * data);
 extern uint8_t aceinna_j1939_send_position_rapid_update(GPS_DATA * data);
 extern uint8_t aceinna_j1939_build_msg(void *payload, msg_params_t *params);
 extern uint8_t aceinna_j1939_send_veh_dir_speed(VEHICLE_DIR_SPEED *data);
+extern uint8_t aceinna_j1939_send_user_behavior(uint16_t behavior);
 
 
 extern void      SaveEcuAddress(uint16_t address);
@@ -798,7 +805,7 @@ extern BOOL      UseAlgorithm();
 // PF 255
 // PS 50 - 5F
 #define SAE_J1939_CONTROL1_ID_BASE          0x18FFFF00
-#define SAE_J1939_CONTROL1_FILTER_BASE_MASK 0x18FF5000
+#define SAE_J1939_CONTROL1_FILTER_BASE_MASK 0x18FF4000
 
 // priority 6
 // PF 253

@@ -37,26 +37,31 @@ limitations under the License.
 #define VERSION_STAGE 0
 #define VERSION_BUILD 0
 
-#define VERSION_MAJOR_NUM 1
-#define VERSION_MINOR_NUM 1
-#define VERSION_PATCH_NUM 6
-#define VERSION_STAGE_NUM 0
-#define VERSION_BUILD_NUM 0
 
 //
 //                                    1         2
 //                           12345678901234567890
 #ifndef  CAN_BUS_COMM
-#define  SOFTWARE_PART      "5020-3885-02 1.1.6"
+    #define VERSION_MAJOR_NUM 04
+    #define VERSION_MINOR_NUM 1
+    #define VERSION_PATCH_NUM 0
+    #define VERSION_STAGE_NUM 0
+    #define VERSION_BUILD_NUM 2
+    #define SOFTWARE_PART      "5020-3886-02 04.01.02"
 #else
-#define  SOFTWARE_PART      "5020-3309-01 1.1.6"
+    #define VERSION_MAJOR_NUM 03
+    #define VERSION_MINOR_NUM 1
+    #define VERSION_PATCH_NUM 0
+    #define VERSION_STAGE_NUM 0
+    #define VERSION_BUILD_NUM 0
+    #define  SOFTWARE_PART      "5020-3309-01 03.01.08"
 #endif
 
 #define  SOFTWARE_PART_LEN  30
 #define  VERSION_STR        SOFTWARE_PART  
 #define  N_VERSION_STR      128
 #define  SIZEOF_WORD        2 // [bytes]
-#define  SPI_SW_VERSION     40
+#define  SPI_SW_VERSION     41
 
 /**
  * 'VR' and 'VA' only use UINT8 field bootloader reads unspecified UINT (but

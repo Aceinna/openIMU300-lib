@@ -311,7 +311,7 @@ void platformInitConfigureUnit(void)
 
     userSerialChan   = _uartChannel[USER_SERIAL_PORT];
 #ifdef GPS
-    gpsSerialChan    = _uartChannel[GPS_SERIAL_PORT];
+    gpsChan    = _uartChannel[GPS_SERIAL_PORT];
 #endif
     debugSerialChan  = _uartChannel[DEBUG_SERIAL_PORT];
     _interfaceConfigDone = 1;
@@ -486,39 +486,6 @@ void markConfigAsInvalid(void)
 } 
 
 
-
-/*
-enum rawSensor_e {
-    XACCEL = 0, 
-    YACCEL = 1, 
-    ZACCEL = 2,
-    XRATE = 3, 
-    YRATE = 4, 
-    ZRATE = 5,
-    XMAG = 6, 
-    YMAG = 7, 
-    ZMAG = 8,
-    XATEMP = 9, 
-    YATEMP = 10, 
-    ZATEMP = 11,
-    XRTEMP = 12, 
-    YRTEMP = 13, 
-    ZRTEMP = 14,
-    BTEMP = 15,
-    N_RAW_SENS = 16 // size
-};
-*/
-
-/*
-void GetGPSData(gpsDataStruct_t *data)
-{
-    data->altEllipsoid = gGpsDataPtr->altEllipsoid;
-    data->altitude     = gGpsDataPtr->alt;
-    data->latitude     = gGpsDataPtr->lat;
-    data->longitude    = gGpsDataPtr->lon;
-
-}
-*/
 
 BOOL platformSetPacketRate(int rate, BOOL fApply)
 {
@@ -737,7 +704,7 @@ BOOL platformSetOrientation(uint16_t *input, BOOL fApply)
     }
 
     gConfiguration.orientation.all =  orientation;
-    
+    *input                         = orientation; 
     return TRUE;
 
 }
@@ -752,15 +719,24 @@ BOOL platformApplyOrientation(uint16_t input)
     return TRUE;
 }
 
+uint16_t    platformGetOrientationWord()
+{
+    return gConfiguration.orientation.all;
+}
+
+
 
 
 //#pragma GCC pop_options
 
-int platformGetBaudRate()
+int platformGetBaudRate(uint16_t baudCode)
 {
     int baudRate = 0;
+    if(baudCode == 0xFFFF){
+        baudCode = gConfiguration.baudRateUser;
+    }
     
-    switch (gConfiguration.baudRateUser){
+    switch (baudCode){
         case BAUD_9600:  baudRate = 9600;  break;
         case BAUD_19200: baudRate = 19200;  break;
         case BAUD_38400: baudRate = 38400;  break;
@@ -777,12 +753,15 @@ int platformGetBaudRate()
     return baudRate;
 }
 
-int platformGetPacketRate()
+int platformGetPacketRate(uint16_t divider)
 {
-
     int rate = 0;
 
-    switch(gConfiguration.packetRateDivider){
+    if(divider == 0xFFFF){
+        divider = gConfiguration.packetRateDivider;
+    }
+
+    switch(divider){
         case PACKET_RATE_DIV_200HZ:
             rate = 200;
             break;
@@ -814,45 +793,6 @@ int platformGetPacketRate()
     }
 
     return rate;
-}
-
-int platformGetOrientation()
-{
-    /// 'X' (0x58) -> plus  X, 'Y' (0x59) -> plus Y,  'Z' (0x5a) -> plus Z
-    /// 'x' (0x78) -> minus X, 'y' (0x79) -> minus Y, 'z' (0x7a) ->minusZ
-    int orientation;
-
-    switch (gConfiguration.orientation.all) {
-    case 9:    orientation = 0x005A7978; break;         // 0000 000 | 00 0 | 00 1 | 00 1 +Z -Y -X 
-    case 35:   orientation = 0x005A5859; break;         // 0000 000 | 00 0 | 10 0 | 01 1 +Z +X +Y
-    case 42:   orientation = 0x005A7958; break;         // 0000 000 | 00 0 | 10 1 | 01 0 +Z -X +Y
-    case 65:   orientation = 0x007A5978; break;         // 0000 000 | 00 1 | 00 0 | 00 1 -Z +Y -X 
-    case 72:   orientation = 0x007A7958; break;         // 0000 000 | 00 1 | 00 1 | 00 0 -Z -Y +X
-    case 98:   orientation = 0x007A5859; break;         // 0000 000 | 00 1 | 10 0 | 01 0 -Z +X +Y 
-    case 107:  orientation = 0x007A7879; break;         // 0000 000 | 00 1 | 10 1 | 01 1 -Z -X -Y
-    case 133:  orientation = 0x0058597A; break;         // 0000 000 | 01 0 | 00 0 | 10 1 +X +Y -Z
-    case 140:  orientation = 0x0058795A; break;         // 0000 000 | 01 0 | 00 1 | 10 0 +X -Y +Z
-    case 146:  orientation = 0x00585A59; break;         // 0000 000 | 01 0 | 01 0 | 01 0 +X +Z +Y
-    case 155:  orientation = 0x00587A79; break;         // 0000 000 | 01 0 | 01 1 | 01 1 +X -Z -Y
-    case 196:  orientation = 0x0078595A; break;         // 0000 000 | 01 1 | 00 0 | 10 0 -X +Y +Z
-    case 205:  orientation = 0x0078797A; break;         // 0000 000 | 01 1 | 00 1 | 10 1 -X -Y -Z
-    case 211:  orientation = 0x00785A79; break;         // 0000 000 | 01 1 | 01 0 | 01 1 -X +Z -Y
-    case 218:  orientation = 0x00787A59; break;         // 0000 000 | 01 1 | 01 1 | 01 0 -X -Z +Y
-    case 273:  orientation = 0x00595A78; break;         // 0000 000 | 10 0 | 01 0 | 00 1 +Y +Z -X
-    case 280:  orientation = 0x00597A58; break;         // 0000 000 | 10 0 | 01 1 | 00 0 +Y -Z +X
-    case 292:  orientation = 0x0059585A; break;         // 0000 000 | 10 0 | 10 0 | 10 0 +Y +X +Z
-    case 301:  orientation = 0x0059787A; break;         // 0000 000 | 10 0 | 10 1 | 10 1 +Y -X -Z
-    case 336:  orientation = 0x00795A58; break;         // 0000 000 | 10 1 | 01 0 | 00 0 -Y +Z +X
-    case 345:  orientation = 0x00797A78; break;         // 0000 000 | 10 1 | 01 1 | 00 1 -Y -Z -X
-    case 357:  orientation = 0x0079587A; break;         // 0000 000 | 10 1 | 10 0 | 10 1 -Y +X -Z
-    case 364:  orientation = 0x0079785A; break;         // 0000 000 | 10 1 | 10 1 | 10 0 -Y -X +Z
-    case 0:    
-    default:
-        orientation = 0x005A5958; break;         // 0000 000 | 00 0 | 00 0 | 00 0 +Z +Y +X
-    }
-
-    return orientation; 
-
 }
 
 
@@ -1036,7 +976,7 @@ BOOL platformAssignPortTypeToSerialChannel(int portType, int channel)
     return FALSE;
 }
 
-int  platformGetSerialChannel(int portType)
+int  platformGetSerialChannel(int portType, BOOL fTx)
 {
     return _uartChannel[portType];
 }
@@ -1183,6 +1123,69 @@ int  platformGetFilterType(int sensor, BOOL fSpi)
     }
 }
 
+
+int     platformGetFilterFrequency(int sensor, BOOL fSpi)
+{
+    int counts;
+
+    if(sensor == ACCEL_SENSOR){
+        counts = gConfiguration.analogFilterClocks[1];
+    }else if(sensor == RATE_SENSOR){
+        counts = gConfiguration.analogFilterClocks[2];
+    }else{
+        return -1;
+    }
+    
+    if(fSpi){
+        return counts;
+    }
+
+    if (counts > 18749 ) {
+        return 2;
+    } else if ( (counts <= 18749) && (counts > 8034) ) {
+        return 5;
+    } else if ( (counts <= 8034) && (counts > 4017) ) {
+        return 10;
+    } else if ( (counts <= 4017) && (counts > 2410) ) {
+        return 20;
+    } else if ( (counts <= 2410) && (counts > 1740) ) {
+        return 25;
+    } else if ( (counts <= 1740) && (counts > 1204) ) {
+        return 40;
+    } else if ( (counts <= 1204) && (counts > 0) ) {
+        return 50;
+    } else if (counts == 0) {
+        return 0;
+    } else {
+        return 0;  // never hit this, just here to remove compiler warning
+    }
+}
+
+uint16_t    platformGetFilterFrequencyFromCounts(uint16_t counts)
+{
+    if (counts > 18749 ) {
+        return 2;
+    } else if ( (counts <= 18749) && (counts > 8034) ) {
+        return 5;
+    } else if ( (counts <= 8034) && (counts > 4017) ) {
+        return 10;
+    } else if ( (counts <= 4017) && (counts > 2410) ) {
+        return 20;
+    } else if ( (counts <= 2410) && (counts > 1740) ) {
+        return 25;
+    } else if ( (counts <= 1740) && (counts > 1204) ) {
+        return 40;
+    } else if ( (counts <= 1204) && (counts > 0) ) {
+        return 50;
+    } else if (counts == 0) {
+        return 0;
+    } else {
+        return 0;  // never hit this, just here to remove compiler warning
+    }
+
+}
+
+
 int   platformGetPreFilterType()
 {
     uint32_t counts = gConfiguration.analogFilterClocks[0];
@@ -1211,6 +1214,8 @@ int   platformGetPreFilterType()
         return BWF_LOWPASS_4TH_50;
     } else if ( counts == 14) {
         return BWF_LOWPASS_4TH_100;
+    } else if ( counts == 15) {
+        return BWF_LOWPASS_AVERAGE;
     }else if (counts == 0) {
         return BWF_LOWPASS_NONE;
     } else {
@@ -1251,7 +1256,7 @@ void platformForceUnassignSerialChannels()
     _uartChannel[DEBUG_SERIAL_PORT] = UART_CHANNEL_NONE;
     userSerialChan  = -1;
     debugSerialChan = -1;
-    gpsSerialChan   = -1;
+    gpsChan   = -1;
 }
 
 BOOL platformForcePortTypeToSerialChannel(int portType, int channel)
@@ -1277,7 +1282,7 @@ BOOL platformForcePortTypeToSerialChannel(int portType, int channel)
                 userSerialChan   = _uartChannel[USER_SERIAL_PORT];
                 break;
             case GPS_SERIAL_PORT:
-                gpsSerialChan   = _uartChannel[GPS_SERIAL_PORT];
+                gpsChan          = _uartChannel[GPS_SERIAL_PORT];
                 break;
             case DEBUG_SERIAL_PORT:
                 debugSerialChan = _uartChannel[DEBUG_SERIAL_PORT];
@@ -1304,4 +1309,14 @@ void platformDetectUserSerialCmd(uint8_t input)
         platformForcePortTypeToSerialChannel(USER_SERIAL_PORT, UART_CHANNEL_0);   //switch serial channel to user port
 
         }
+}
+
+void platformSetEcuBaudrate(uint16_t rate)
+{
+    gConfiguration.ecuBaudRate = rate;    
+}
+
+void platformSetEcuAddress(uint16_t address)
+{
+    gConfiguration.ecuAddress = address;    
 }

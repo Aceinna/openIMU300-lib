@@ -240,6 +240,34 @@ uint8_t aceinna_j1939_send_packet_type(uint16_t type)
 	return aceinna_j1939_build_msg((void *)data, &params);
 }
 
+/*******************************************
+ * @brief 
+ * 
+ * @param behavior ==
+ * @return uint8_t 
+********************************************/
+uint8_t aceinna_j1939_send_user_behavior(uint16_t behavior)
+{
+  	msg_params_t params;
+	uint8_t 	data[8];
+
+  // header message of packet type response
+    params.data_page = 0;
+  	params.ext_page = 0;
+  	params.pkt_type = SAE_J1939_RESPONSE_PACKET;
+  	params.len      = ACEINNA_SAE_J1939_USER_BEHAVIOR_LEN;
+  	params.priority = SAE_J1939_CONTROL_PRIORITY;
+  	params.PF       = SAE_J1939_PDU_FORMAT_GLOBAL;
+  	params.PS       = gEcuConfigPtr->user_behavior_ps;
+  
+ 	 // payload of packet type response
+  	data[0] = *(uint8_t *)gEcu->addr;
+  	data[1] = behavior & 0xff;
+  	data[2] = (behavior >> 8) & 0xff;
+  
+	return aceinna_j1939_build_msg((void *)data, &params);
+}
+
 /** ***************************************************************************
  * @name  aceinna_j1939_send_digital_filter() repond SET lpf request
  * @brief perform lpf SET feature in spec 5.4.3
@@ -605,7 +633,7 @@ end_j1939_rcv:
  ******************************************************************************/ 
 void user_alg_reset(void)
 {
-  InitializeAlgorithmStruct(FREQ_200_HZ);
+  InitializeAlgorithmStruct(FREQ_200_HZ, CurrentIMU);
 }
 
 

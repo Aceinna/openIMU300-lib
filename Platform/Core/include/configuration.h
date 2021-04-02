@@ -129,10 +129,11 @@ typedef struct {
     uint16_t           analogFilterClocks[3];                               //  0x0004, 0x0005, 0x0006
 
     union Orientation  orientation; 	  /// user defined axis orientation     0x0007
-
+    uint16_t            userBehaviour;                                       // 0x0008
     int16_t            hardIronBias[2];    ///< [-1,1) Gauss                    0x0009, 0x000a
     uint16_t           softIronScaleRatio; ///< [0,2), [0-200%)                 0x000b
     uint16_t           headingTrackOffset;                                  //  0x000c
+    uint16_t           turnSwitchThreshold;                                 //  0x000d
     int16_t            softIronAngle;                                       //  0x000e
     uint16_t           rsvd;                                                //  0x000f
 

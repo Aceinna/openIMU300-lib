@@ -68,6 +68,7 @@ void TaskCANCommunicationJ1939(void const *argument)
         gEcuConfigPtr->ecu_name.bits.function         = ACEINNA_SAE_J1939_FUNCTION;
         gEcuConfigPtr->ecu_name.bits.manufacture_code = ACEINNA_SAE_J1939_MANUFACTURER_CODE;
         gEcuConfigPtr->ecu_name.bits.identity_number = unitSerialNumber() & 0x1fffff;
+        gEcuConfigPtr->ecu_name.bits.arbitrary_address = 1; // support
     }
     
     sae_j1939_initialize(baudRate, address);

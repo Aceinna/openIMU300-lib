@@ -261,7 +261,7 @@ BOOL handleOverRange(void)
 		overRangeCount = 0;
 
         // Set the flags to RESTART the algorithm
-        InitializeAlgorithmStruct(gAlgorithm.callingFreq);
+        InitializeAlgorithmStruct(gAlgorithm.callingFreq, gAlgorithm.imuType);
 	} else if(overRangeCount > 0)
         overRangeCount--;
 	else
