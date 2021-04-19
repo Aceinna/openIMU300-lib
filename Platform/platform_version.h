@@ -54,7 +54,7 @@ limitations under the License.
     #define VERSION_PATCH_NUM 0
     #define VERSION_STAGE_NUM 0
     #define VERSION_BUILD_NUM 0
-    #define  SOFTWARE_PART      "5020-3309-01 03.01.08"
+    #define  SOFTWARE_PART      "5020-3309-01 03.01.09"
 #endif
 
 #define  SOFTWARE_PART_LEN  30
