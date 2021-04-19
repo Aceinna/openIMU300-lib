@@ -75,6 +75,8 @@ extern BOOL     eraseUserConfigInEeprom(void);
 #define REMOTE_MAG_SER_NO_FIELD_ID_1  		0x002A
 #define ECU_ADDRESS_FIELD_ID                0x0032
 #define ECU_BAUD_RATE_FIELD_ID              0x0033
+#define ECU_PACKET_RATE_FIELD_ID            0x003C
+#define ECU_PACKET_TYPE_FIELD_ID            0x003D
 #define UPPER_CONFIG_ADDR_BOUND				0x0040	///< upper configuration address boundary
 
 #define PRODUCT_CONFIGURATION_FIELD_ID		0x071C	///< outside of configuration, but needs to be read as a field

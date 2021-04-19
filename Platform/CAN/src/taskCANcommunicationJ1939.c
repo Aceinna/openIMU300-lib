@@ -117,6 +117,8 @@ void TaskCANCommunicationJ1939(void const *argument)
 
         PacketRateCounter++;
         
+        CheckUpdateCanPacketTypeRate();
+       
         if(PacketRateCounter >= gEcuConfig.packet_rate*2){
             PacketRateCounter   = 0;
             sendPeriodicPackets = 1;

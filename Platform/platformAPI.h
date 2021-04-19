@@ -125,6 +125,14 @@ uint16_t   platformGetFilterFrequencyFromCounts(uint16_t counts);
 void       platformSetEcuBaudrate(uint16_t rate); 
 void       platformSetEcuAddress(uint16_t address);
 BOOL      platformDetectPingMessageFromGpsDriver(uint8_t byte);
+uint8_t    platformGetEcuAddress();
+uint8_t    platformGetEcuBaudrate();
+uint8_t    platformGetEcuPacketRate();
+uint8_t    platformGetEcuPacketType();
+uint16_t   platformGetEcuBehavior();
+void       platformSetEcuPacketRate(uint16_t rate);
+void       platformSetEcuPacketType(uint16_t type);
+
 
 
 
@@ -172,6 +180,8 @@ void     ResetChanges();
 uint16_t GetNewEcuUartBaudrate();
 uint16_t GetNewEcuPacketType();
 uint16_t GetNewEcuUartPacketRate();
+uint16_t GetNewEcuPacketType();
+uint16_t GetNewEcuPacketRate();
 
 
 #endif

@@ -336,6 +336,11 @@ void platformInitConfigureUnit(void)
     if (gConfiguration.packetRateDivider > 200)
       gConfiguration.packetRateDivider = 10;     // 20 Hz at 200, will show 10 Hz     
 
+    if (gConfiguration.CanOdr > 100)
+        gConfiguration.CanOdr = 1;       // 100 Hz
+
+    if (gConfiguration.canPacketType > 0xFF)
+        gConfiguration.canPacketType = 0x07;  // ARI, ACCS, SSI2
 
     /// check user orientation field for validity
     if (CheckOrientation(gConfiguration.orientation.all) == FALSE) {
@@ -1319,4 +1324,40 @@ void platformSetEcuBaudrate(uint16_t rate)
 void platformSetEcuAddress(uint16_t address)
 {
     gConfiguration.ecuAddress = address;    
+}
+
+// Getters 
+uint8_t    platformGetEcuAddress()
+{
+    return gConfiguration.ecuAddress;
+}
+
+uint8_t    platformGetEcuBaudrate()
+{
+    return gConfiguration.ecuBaudRate;    
+}
+
+uint8_t    platformGetEcuPacketRate()
+{
+    return gConfiguration.CanOdr;
+}
+
+uint8_t    platformGetEcuPacketType()
+{
+    return gConfiguration.canPacketType;
+}
+
+uint16_t   platformGetEcuBehavior()
+{
+    return gConfiguration.userBehaviour;
+}
+
+void platformSetEcuPacketRate(uint16_t rate)
+{
+    gConfiguration.CanOdr = rate;    
+}
+
+void platformSetEcuPacketType(uint16_t type)
+{
+    gConfiguration.canPacketType = type;    
 }

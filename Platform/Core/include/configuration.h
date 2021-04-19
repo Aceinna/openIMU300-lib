@@ -182,7 +182,7 @@ typedef struct {
     uint16_t           AngConeAlarmPs;                                          // 0x0039 
     int16_t            CanBaudRateDetectEnable;                                 // 0x003a
     int16_t            CanTermResistorEnable;                                   // 0x003b
-    int16_t            CanOdr;                                                  // 0x003c
+    uint16_t           CanOdr;                                                  // 0x003c
     uint16_t           canPacketType;                                           // 0x003d
 //    uint16_t           AccelPs;                                                 // 0x003a
 

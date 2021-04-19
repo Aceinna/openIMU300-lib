@@ -52,9 +52,13 @@ static uint16_t newAccelFiltr  = 0xFFFF;
 static uint16_t newRateFiltr   = 0xFFFF;
 static uint16_t newEcuAddress  = 0xFFFF;
 static uint16_t newEcuBaudrate = 0xFFFF;
+static uint16_t newEcuPacketType      = 0xFFFF;
+static uint16_t newEcuPacketRate      = 0xFFFF;
+
 static uint16_t newEcuUartBaudrate = 0xFFFF;
 static uint16_t newEcuUartPacketType = 0xFFFF;
 static uint16_t newEcuUartPacketRate = 0xFFFF;
+
 static uint16_t tempEcuUartBaudrate = 0xFFFF;
 static uint16_t tempEcuUartPacketType = 0xFFFF;
 static uint16_t tempEcuUartPacketRate = 0xFFFF;
@@ -90,15 +94,21 @@ uint16_t GetNewEcuBaudrate()
     return newEcuBaudrate;
 }
 
+uint16_t GetNewEcuPacketType()
+{
+    return newEcuPacketType;
+}
+
+uint16_t GetNewEcuPacketRate()
+{
+    return newEcuPacketRate;
+}
+
 uint16_t GetNewEcuUartBaudrate()
 {
     return newEcuUartBaudrate;
 }
 
-uint16_t GetNewEcuPacketType()
-{
-    return newEcuUartPacketType;
-}
 
 uint16_t GetNewEcuUartPacketRate()
 {
@@ -114,6 +124,9 @@ void    ResetChanges()
     newRateFiltr   = 0xFFFF;
     newEcuAddress  = 0xFFFF;
     newEcuBaudrate = 0xFFFF;
+    newEcuPacketRate     = 0xFFFF;
+    newEcuPacketType     = 0xFFFF;
+
     newEcuUartBaudrate   = 0xFFFF;
     newEcuUartPacketType = 0xFFFF;
     newEcuUartPacketRate = 0xFFFF;
@@ -322,6 +335,20 @@ static uint8_t CheckFieldData (ConfigurationStruct *currentConfiguration,
                     validFields[validFieldIndex++] = fieldId[fieldIndex];
                     if(fWriteRequest){
                         newEcuBaudrate = fieldData[fieldIndex];
+                    }
+                    break;
+                case ECU_PACKET_RATE_FIELD_ID:
+                    ((uint16_t *)currentConfiguration)[(fieldId[fieldIndex])] = fieldData[fieldIndex];
+                    validFields[validFieldIndex++] = fieldId[fieldIndex];
+                    if(fWriteRequest){
+                        newEcuPacketRate = fieldData[fieldIndex];
+                    }
+                    break;
+                case ECU_PACKET_TYPE_FIELD_ID:
+                    ((uint16_t *)currentConfiguration)[(fieldId[fieldIndex])] = fieldData[fieldIndex];
+                    validFields[validFieldIndex++] = fieldId[fieldIndex];
+                    if(fWriteRequest){
+                        newEcuPacketType = fieldData[fieldIndex];
                     }
                     break;
                 case OFFSET_ROLL_ALIGN_FIELD_ID:
