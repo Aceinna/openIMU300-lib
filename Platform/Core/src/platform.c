@@ -595,7 +595,7 @@ BOOL platformSetBaudRate(int baudRate, BOOL fApply)
 
 //#pragma GCC push_options
 //#pragma GCC optimize ("O0")
-BOOL platformSetOrientation(uint16_t *input, BOOL fApply)
+BOOL platformSetOrientation(uint16_t *input, uint16_t *output, BOOL fApply)
 {
     BOOL res;
     uint32_t  orientation = 0;
@@ -709,7 +709,7 @@ BOOL platformSetOrientation(uint16_t *input, BOOL fApply)
     }
 
     gConfiguration.orientation.all =  orientation;
-    *input                         = orientation; 
+    *output                        = orientation; 
     return TRUE;
 
 }

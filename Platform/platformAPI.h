@@ -37,7 +37,7 @@ void markConfigAsInvalid(void);
 BOOL saveEcuAddress(uint16_t* address);
 BOOL platformSetPacketRate(int rate, BOOL fApply);
 BOOL platformSetBaudRate(int baudRate, BOOL fApply);
-BOOL platformSetOrientation(uint16_t *input, BOOL fApply);
+BOOL platformSetOrientation(uint16_t *input, uint16_t *output, BOOL fApply);
 int  platformConvertPacketRateDivider(int configParam);
 int  platformGetPacketRateDivider();
 void platformSetPacketRateDivider(int div);
