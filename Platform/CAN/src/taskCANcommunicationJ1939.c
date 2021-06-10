@@ -20,7 +20,7 @@
 #include "debug.h"
 #include "platformAPI.h"
 #include "osresources.h"
-#include "indices.h"
+#include "Indices.h"
 #include "UserConfiguration.h"
 #include "UserMessagingCAN.h"
 #include "sensors_data.h"
