@@ -336,8 +336,9 @@ void platformInitConfigureUnit(void)
     if (gConfiguration.packetRateDivider > 200)
       gConfiguration.packetRateDivider = 10;     // 20 Hz at 200, will show 10 Hz     
 
-    if (gConfiguration.CanOdr > 100)
-        gConfiguration.CanOdr = 1;       // 100 Hz
+    if (gConfiguration.CanOdr > 100){
+        gConfiguration.CanOdr = 100;       // 100 Hz
+    }
 
     if (gConfiguration.canPacketType > 0xFF)
         gConfiguration.canPacketType = 0x07;  // ARI, ACCS, SSI2
@@ -1339,7 +1340,10 @@ uint8_t    platformGetEcuBaudrate()
 
 uint8_t    platformGetEcuPacketRate()
 {
-    return gConfiguration.CanOdr;
+    if(gConfiguration.CanOdr != 0){
+        return 100/gConfiguration.CanOdr;
+    }
+    return 0;
 }
 
 uint8_t    platformGetEcuPacketType()
@@ -1354,6 +1358,9 @@ uint16_t   platformGetEcuBehavior()
 
 void platformSetEcuPacketRate(uint16_t rate)
 {
+    if(rate != 0){
+        rate = 100/rate;
+    }
     gConfiguration.CanOdr = rate;    
 }
 
