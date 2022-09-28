@@ -44,7 +44,6 @@ static ConfigurationStruct proposedRamConfiguration;
 static ConfigurationStruct proposedEepromConfiguration;
 
 static BOOL portConfigurationChanged = FALSE; // port settings are to be changed
-extern BOOL memsicMag;
 BOOL fWriteRequest = FALSE;
 
 static uint16_t newOrientation = 0xFFFF;
@@ -629,30 +628,9 @@ uint16_t appendMagReadings( uint8_t  *response,
 {
     int tmp;
 
-    if(!memsicMag){
-
-    /// Cycle through each magnetometer axis and convert it to a 16-bit integer
-    /// X-Axis
-    tmp = _qmul( TWO_POW16_OVER_20_q19, gSensorsData.scaledSensors_q27[XMAG], 19, 27, 16 ) >> 16;
-    /// Split the 16-bit integer into two 8-bit numbers and place it into the buffer
-    index = uint16ToBuffer(response,
-                           index,
-                           tmp);
-    /// Y-Axis
-    tmp = _qmul( TWO_POW16_OVER_20_q19, gSensorsData.scaledSensors_q27[YMAG], 19, 27, 16 ) >> 16;
-    index = uint16ToBuffer(response,
-                           index,
-                           tmp);
-    /// Z-Axis
-    tmp = _qmul( TWO_POW16_OVER_20_q19, gSensorsData.scaledSensors_q27[ZMAG], 19, 27, 16 ) >> 16;
-    index = uint16ToBuffer(response,
-                           index,
-                           tmp);
-    }else{
-        for(int i = 0; i < 3; i++){
-            tmp   = gSensorsData.scaledSensors[XMAG + i] * 3276.8;
-            index = uint16ToBuffer(response, index, tmp);
-        }
+    for(int i = 0; i < 3; i++){
+        tmp   = gSensorsData.scaledSensors[XMAG + i] * 3276.8;
+        index = uint16ToBuffer(response, index, tmp);
     }
 
     return index;
